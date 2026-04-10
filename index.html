@@ -194,6 +194,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="sig-wrap" id="sigW"><canvas id="sigC" height="150"></canvas><button class="sig-clear" onclick="clrSig()">クリア</button></div>
 <div class="sig-label">↑ 指またはペンで署名</div>
 
+<input type="text" id="hp_email" name="email" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;opacity:0;height:0">
 <button class="nxt" id="subBtn" disabled onclick="submit()">✉️ 薬局に送信する</button>
 </div></div>
 
@@ -258,6 +259,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxuovABhEdLp2-mKHATkno5bIZQ14u6X6gJbAvPxriDcnLlcxcAuGZ8vRUBk1CH2JWT/exec';
 
 const STEPS=14;
+const SEC_KEY='jiro-ec-2026';
+const startTime=Date.now();
 let D={nursing:false,age:'',ct:[],sx:{},pr:false,pu:false,jp:true,pd:'',pc:'',pa:''};
 let hasSig=false;
 
@@ -310,12 +313,19 @@ async function submit(){
   document.getElementById('ovlMsg').textContent='送信中...';
   document.getElementById('ovlSub').textContent='ジロー薬局に通知しています';
 
+  // スパム対策チェック
+  const honeypot=document.getElementById('hp_email').value;
+  if(honeypot){console.warn('bot detected');ovl.classList.remove('on');return;}
+  const elapsed=Date.now()-startTime;
+  if(elapsed<10000){alert('入力が早すぎます。もう一度お試しください。');ovl.classList.remove('on');return;}
+
   const payload={
     name, signature:sig, age:D.age,
     periodDate:D.pd, periodCycle:D.pc, periodAmt:D.pa,
     sex3w:D.sx.s3w, sex3o:D.sx.s3o, sexWorry:D.sx.swr,
     priorUse:D.pu, nursing:D.nursing, japan:D.jp,
-    cautions:D.ct, pregRisk:D.pr
+    cautions:D.ct, pregRisk:D.pr,
+    _key:SEC_KEY, _ts:elapsed
   };
 
   let rcpId='EC-'+Date.now().toString(36).toUpperCase();
