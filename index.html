@@ -62,6 +62,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .spinner{width:40px;height:40px;border:4px solid var(--bd);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media print{body{background:#fff}.hd,.pb,.rb,.tl,.lb,.ft,.ovl{display:none!important}.wrap{max-width:100%;padding:0}.cd{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.st{display:none!important}.st[data-s="print"]{display:block!important}.print-only{display:block!important}}
+.bk{display:inline-block;padding:10px 0;font-family:inherit;font-size:13px;color:var(--txs);background:none;border:none;cursor:pointer;margin-bottom:8px}
+.bk:before{content:'← ';font-size:12px}
 .print-only{display:none}
 </style>
 </head>
@@ -88,12 +90,14 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- S1 -->
 <div class="st" data-s="1"><div class="cd">
+<button class="bk" onclick="go(0)">戻る</button>
 <div class="sl">チェック 1/13</div><div class="q">服用するご本人（女性）が来局し服用されますか？</div>
 <div class="bg"><button class="b by" onclick="go(2)">はい</button><button class="b bn" onclick="showNG('proxy')">いいえ</button></div>
 </div></div>
 
 <!-- S2 -->
 <div class="st" data-s="2"><div class="cd">
+<button class="bk" onclick="go(1)">戻る</button>
 <div class="sl">チェック 2/13</div><div class="q">妊娠が心配な性交から72時間以内ですか？</div>
 <div class="qn">早いほど効果が高くなります。</div>
 <div class="bg"><button class="b by" onclick="go(3)">はい</button><button class="b bn" onclick="showNG('time')">いいえ</button><button class="b bw" onclick="showNG('time')">わからない</button></div>
@@ -101,6 +105,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- S3 -->
 <div class="st" data-s="3"><div class="cd">
+<button class="bk" onclick="go(2)">戻る</button>
 <div class="sl">チェック 3/13</div><div class="q">レボノルゲストレルでアレルギーは？</div>
 <div class="qn">初めての方は「いいえ」。</div>
 <div class="bg"><button class="b by" onclick="go(4)">いいえ</button><button class="b bng" onclick="showNG('allergy')">はい</button></div>
@@ -108,18 +113,21 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- S4 -->
 <div class="st" data-s="4"><div class="cd">
+<button class="bk" onclick="go(3)">戻る</button>
 <div class="sl">チェック 4/13</div><div class="q">肝臓病の診断を受けていますか？</div>
 <div class="bg"><button class="b by" onclick="go(5)">いいえ</button><button class="b bng" onclick="showNG('liver')">はい</button></div>
 </div></div>
 
 <!-- S5 -->
 <div class="st" data-s="5"><div class="cd">
+<button class="bk" onclick="go(4)">戻る</button>
 <div class="sl">チェック 5/13</div><div class="q">現在、妊娠していますか？</div>
 <div class="bg"><button class="b by" onclick="go(6)">いいえ</button><button class="b bng" onclick="showNG('pregnant')">はい</button></div>
 </div></div>
 
 <!-- S6 -->
 <div class="st" data-s="6"><div class="cd">
+<button class="bk" onclick="go(5)">戻る</button>
 <div class="sl">チェック 6/13</div><div class="q">現在、授乳中ですか？</div>
 <div class="qn">服用可能ですが服用後24時間は授乳を避けてください。</div>
 <div class="bg"><button class="b by" onclick="go(7)">いいえ</button><button class="b bw" onclick="D.nursing=true;D.ct.push('授乳中');go(7)">はい</button></div>
@@ -127,6 +135,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- S7 -->
 <div class="st" data-s="7"><div class="cd">
+<button class="bk" onclick="go(6)">戻る</button>
 <div class="sl">チェック 7/13</div><div class="q">以下に該当するものは？</div>
 <div class="qn">該当があっても薬剤師相談で服用できる場合があります。</div>
 <div class="ci"><input type="checkbox" id="c1"><label for="c1">心臓病</label></div>
@@ -141,12 +150,14 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- S8 -->
 <div class="st" data-s="8"><div class="cd">
+<button class="bk" onclick="go(7)">戻る</button>
 <div class="sl">チェック 8/13</div><div class="q">年齢について</div>
 <div class="bg"><button class="b by" onclick="D.age='16+';go(9)">16歳以上</button><button class="b bw" onclick="D.age='u16';D.ct.push('16歳未満');go(9)">16歳未満</button></div>
 </div></div>
 
 <!-- S9 -->
 <div class="st" data-s="9"><div class="cd">
+<button class="bk" onclick="go(8)">戻る</button>
 <div class="sl">チェック 9/13</div><div class="q">直近の月経（生理）について</div>
 <label class="fl">月経開始日</label><input type="date" class="fi" id="lp">
 <label class="fl">月経周期</label>
@@ -158,6 +169,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- S10 -->
 <div class="st" data-s="10"><div class="cd">
+<button class="bk" onclick="go(9)">戻る</button>
 <div class="sl">チェック 10/13</div><div class="q">性交の状況</div><div class="qn">妊娠の可能性判断のための確認です。</div>
 <label class="fl">① 3週間以上前に性交が</label>
 <div class="bg" style="margin-bottom:16px"><button class="b bn sx" data-k="s3w" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="s3w" data-v="yes" onclick="pk(this)">あった</button></div>
@@ -174,12 +186,14 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- S11 -->
 <div class="st" data-s="11"><div class="cd">
+<button class="bk" onclick="go(10)">戻る</button>
 <div class="sl">チェック 11/13</div><div class="q">緊急避妊薬の使用歴は？</div>
 <div class="bg"><button class="b by" onclick="D.pu=false;go(12)">いいえ（初めて）</button><button class="b bw" onclick="D.pu=true;D.ct.push('EC使用歴あり');go(12)">はい</button></div>
 </div></div>
 
 <!-- S12 -->
 <div class="st" data-s="12"><div class="cd">
+<button class="bk" onclick="go(11)">戻る</button>
 <div class="sl">チェック 12/13</div><div class="q">3週間後、日本に滞在していますか？</div>
 <div class="qn">服用3週間後に妊娠検査が必要です。</div>
 <div class="bg"><button class="b by" onclick="D.jp=true;go(13)">はい</button><button class="b bw" onclick="D.jp=false;D.ct.push('3週間後 日本不在の可能性');go(13)">いいえ / わからない</button></div>
@@ -187,6 +201,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <!-- S13 署名 -->
 <div class="st" data-s="13"><div class="cd">
+<button class="bk" onclick="go(12)">戻る</button>
 <div class="sl">最終確認 13/13</div>
 <div class="q">内容確認と署名</div>
 <div class="qn">確認結果は自動でジロー薬局に送信されます。</div>
