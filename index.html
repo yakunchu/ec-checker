@@ -80,8 +80,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <li>価格：<strong>7,480円（税込）</strong></li>
 </ul></div>
 <div style="background:var(--ng-bg);border:2px solid var(--ng);border-radius:12px;padding:14px;margin-bottom:20px;text-align:center">
-<p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">🔬 状況により、来局時に<br>妊娠検査薬による検査が必要です</p>
-<p style="font-size:12px;color:var(--txs);margin-top:4px">検査薬は薬局でご用意しています（880円・税込）</p>
+<p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">🔬 状況により妊娠検査が必要です</p>
+<p style="font-size:12px;color:var(--txs);margin-top:6px;line-height:1.6">事前にご自身で検査するか、薬局にて検査していただきます（検査薬1本 880円税込）<br>※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</p>
 </div>
 <button class="b by" onclick="go(1)">理解しました</button>
 </div></div>
@@ -166,8 +166,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <label class="fl">③ 月経以降、今回より前に心配な性交が</label>
 <div class="bg" style="margin-bottom:16px"><button class="b bn sx" data-k="swr" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="swr" data-v="yes" onclick="pk(this)">あった</button></div>
 <div id="pregWarn" style="display:none;background:var(--ng-bg);border:2px solid var(--ng);border-radius:12px;padding:16px;margin-top:16px;text-align:center;animation:fi .3s ease">
-<p style="font-size:16px;font-weight:700;color:var(--ng);line-height:1.7">🔬 妊娠検査薬による検査が必要です</p>
-<p style="font-size:13px;color:var(--txs);margin-top:6px;line-height:1.6">既に妊娠している可能性を否定するため、<br>来局時に妊娠検査薬を使用していただきます。<br>（検査薬：880円・税込）</p>
+<p style="font-size:16px;font-weight:700;color:var(--ng);line-height:1.7">🔬 妊娠検査が必要です</p>
+<p style="font-size:13px;color:var(--txs);margin-top:6px;line-height:1.6">現在妊娠している可能性を否定する必要があります。ご自身で事前に妊娠検査薬で検査していただくか、薬局にて検査していただく必要があります（妊娠検査薬1本 880円税込）。<br><strong style="color:var(--ng)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p>
 </div>
 <button class="nxt" id="sxN" disabled onclick="if(D.sx.s3w==='yes'||D.sx.swr==='yes')D.pr=true;go(11)">次へ</button>
 </div></div>
@@ -220,8 +220,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <a href="tel:096-288-0783" class="tl">📞 096-288-0783 に電話する</a>
 </div>
 <div class="cd" id="pregC" style="display:none;margin-top:16px;border:2px solid var(--ng)">
-<h3 style="font-size:15px;color:var(--ng);margin-bottom:8px">🔬 妊娠検査薬による検査が必要です</h3>
-<p style="font-size:13px;color:var(--txs);line-height:1.7">既に妊娠している可能性を否定するため、<strong>来局時に妊娠検査薬を使用</strong>していただきます。<br>検査薬は薬局でご用意しています（880円・税込）。</p></div>
+<h3 style="font-size:15px;color:var(--ng);margin-bottom:8px">🔬 妊娠検査が必要です</h3>
+<p style="font-size:13px;color:var(--txs);line-height:1.7">現在妊娠している可能性を否定する必要があります。ご自身で事前に検査するか、薬局にて検査していただきます（検査薬1本 880円税込）。<br><strong style="color:var(--ng)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p></div>
 <div class="cd" id="nurC" style="display:none;margin-top:16px">
 <h3 style="font-size:14px;color:var(--warn);margin-bottom:8px">🍼 授乳中の方へ</h3>
 <p style="font-size:13px;color:var(--txs);line-height:1.7">服用後<strong>24時間は授乳を避けて</strong>ください。</p></div>
@@ -304,7 +304,7 @@ function buildPvw(){
   const vt=document.getElementById('visitTime').value;
   let h=getLines().join('<br>')+(vt?'<br><strong>来局予定：</strong>'+vt.replace('T',' '):'');
   if(D.ct.length)h+='<br><br><strong>注意事項：</strong>'+D.ct.join('、');
-  if(D.pr)h+='</div><div style="background:var(--ng-bg);border:2px solid var(--ng);border-radius:10px;padding:14px;margin-top:12px;text-align:center"><p style="font-size:16px;font-weight:700;color:var(--ng)">🔬 妊娠検査薬による検査が必要です</p><p style="font-size:12px;color:var(--txs);margin-top:4px">既に妊娠している可能性を否定するための検査です</p>';
+  if(D.pr)h+='</div><div style="background:var(--ng-bg);border:2px solid var(--ng);border-radius:10px;padding:14px;margin-top:12px;text-align:center"><p style="font-size:16px;font-weight:700;color:var(--ng)">🔬 妊娠検査が必要です</p><p style="font-size:12px;color:var(--txs);margin-top:6px;line-height:1.6">現在妊娠している可能性を否定する必要があります。<br>事前にご自身で検査するか、薬局にて検査してください（検査薬1本 880円税込）。<br><strong style="color:var(--ng)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p>';
   document.getElementById('pvw').innerHTML=h;
   initSig();
 }
