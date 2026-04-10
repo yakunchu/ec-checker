@@ -237,6 +237,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="ib" style="margin-top:0"><ul><li>お電話いただくとスムーズです</li><li>飲用水はご用意しています</li><li>プライバシー配慮の個別対応です</li></ul></div>
 <a href="tel:096-288-0783" class="tl">📞 096-288-0783 に電話する</a>
 </div>
+<div class="cd" id="s3oC" style="display:none;margin-top:16px;border:2px solid var(--warn)">
+<p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">ノルレボの服用は可能ですが、他の性交により妊娠が成立している可能性は否定できません。</p></div>
 <div class="cd" id="pregC" style="display:none;margin-top:16px;border:2px solid var(--ng)">
 <h3 style="font-size:15px;color:var(--ng);margin-bottom:8px">🔬 妊娠検査が必要です</h3>
 <p style="font-size:13px;color:var(--txs);line-height:1.7">現在妊娠している可能性を否定する必要があります。ご自身で事前に検査するか、薬局にて検査していただきます（検査薬1本 880円税込）。<br><strong style="color:var(--ng)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p></div>
@@ -397,6 +399,7 @@ async function submit(){
     ovl.classList.remove('on');hideAll();
     document.getElementById('pbar').style.display='none';
     document.getElementById('rcpId').textContent=rcpId;
+    if(D.sx.s3o==='yes')document.getElementById('s3oC').style.display='block';
     if(D.pr)document.getElementById('pregC').style.display='block';
     if(D.nursing)document.getElementById('nurC').style.display='block';
     document.querySelector('[data-s="ok"]').classList.add('on');
