@@ -313,7 +313,7 @@ function showNG(k){hideAll();document.getElementById('pbar').style.display='none
 function saveCk(){const m={c1:'心臓病',c2:'腎臓病',c3:'重度消化器疾患',c4:'医師治療中',c5:'薬アレルギー歴',c6:'セントジョーンズワート',c7:'常用薬/健康食品'};Object.entries(m).forEach(([id,lb])=>{if(document.getElementById(id).checked)D.ct.push(lb)})}
 function pk(btn){const k=btn.dataset.k,v=btn.dataset.v;D.sx[k]=v;btn.parentElement.querySelectorAll('.sx').forEach(b=>{b.classList.remove('chosen','sel');b.classList.add(b.dataset.v===v?'chosen':'sel')});if(D.sx.s3w&&D.sx.s3o&&D.sx.swr)document.getElementById('sxN').disabled=false;
 const w=document.getElementById('pregWarn');if(w)w.style.display=(D.sx.s3w==='yes'||D.sx.swr==='yes')?'block':'none';
-const w2=document.getElementById('s3oWarn');if(w2)w2.style.display=(D.sx.s3o==='yes')?'block':'none'}
+const w2=document.getElementById('s3oWarn');if(w2)w2.style.display=(D.sx.s3o==='yes'&&D.sx.s3w!=='yes'&&D.sx.swr!=='yes')?'block':'none'}
 
 const yn=v=>v==='yes'?'あり':'なし';
 function getLines(){return[
@@ -328,7 +328,7 @@ function buildPvw(){
   const vt=document.getElementById('visitTime').value;
   let h=getLines().join('<br>')+(vt?'<br><strong>来局予定：</strong>'+vt.replace('T',' '):'');
   if(D.ct.length)h+='<br><br><strong>注意事項：</strong>'+D.ct.join('、');
-  if(D.sx.s3o==='yes')h+='</div><div style="background:var(--warn-bg);border:2px solid var(--warn);border-radius:10px;padding:14px;margin-top:12px;text-align:center"><p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">ノルレボの服用は可能ですが、他の性交により妊娠が成立している可能性は否定できません。</p>';
+  if(D.sx.s3o==='yes'&&D.sx.s3w!=='yes'&&D.sx.swr!=='yes')h+='</div><div style="background:var(--warn-bg);border:2px solid var(--warn);border-radius:10px;padding:14px;margin-top:12px;text-align:center"><p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">ノルレボの服用は可能ですが、他の性交により妊娠が成立している可能性は否定できません。</p>';
   if(D.pr)h+='</div><div style="background:var(--ng-bg);border:2px solid var(--ng);border-radius:10px;padding:14px;margin-top:12px;text-align:center"><p style="font-size:16px;font-weight:700;color:var(--ng)">🔬 妊娠検査が必要です</p><p style="font-size:12px;color:var(--txs);margin-top:6px;line-height:1.6">現在妊娠している可能性を否定する必要があります。<br>事前にご自身で検査するか、薬局にて検査してください（検査薬1本 880円税込）。<br><strong style="color:var(--ng)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p>';
   document.getElementById('pvw').innerHTML=h;
   initSig();
@@ -402,7 +402,7 @@ async function submit(){
     ovl.classList.remove('on');hideAll();
     document.getElementById('pbar').style.display='none';
     document.getElementById('rcpId').textContent=rcpId;
-    if(D.sx.s3o==='yes')document.getElementById('s3oC').style.display='block';
+    if(D.sx.s3o==='yes'&&D.sx.s3w!=='yes'&&D.sx.swr!=='yes')document.getElementById('s3oC').style.display='block';
     if(D.pr)document.getElementById('pregC').style.display='block';
     if(D.nursing)document.getElementById('nurC').style.display='block';
     document.querySelector('[data-s="ok"]').classList.add('on');
