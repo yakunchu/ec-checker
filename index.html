@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ジロー薬局 - 緊急避妊薬事前チェック</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0066cc 0%, #004a99 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            padding: 16px 20px;
+            background-color: #f0f4ff;
+            border-bottom: 1px solid #e0e6ff;
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: #0066cc;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e0e6ff;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0066cc, #0047b3);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            padding: 24px 20px;
+            overflow-y: auto;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .step h2 {
+            font-size: 20px;
+            color: #0066cc;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Radio & Checkbox */
+        .radio-group,
+        .checkbox-group {
+            margin-bottom: 16px;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .radio-option input[type="radio"],
+        .checkbox-option input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #0066cc;
+        }
+
+        .radio-option label,
+        .checkbox-option label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        /* Warning Box */
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        /* Signature Canvas */
+        #signatureCanvas {
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            display: block;
+            margin-bottom: 12px;
+            background-color: #fafafa;
+            cursor: crosshair;
+            width: 100%;
+            height: 200px;
+            touch-action: none;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .canvas-controls button {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .canvas-controls button:hover {
+            background-color: #e9ecef;
+            border-color: #0066cc;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        /* Confirmation */
+        .confirmation-section {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .confirmation-section.active {
+            display: block;
+        }
+
+        .confirmation-section h2 {
+            font-size: 28px;
+            color: #0066cc;
+            margin-bottom: 16px;
+        }
+
+        .receipt-number {
+            font-size: 18px;
+            font-weight: 600;
+            background-color: #f0f4ff;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            color: #0066cc;
+        }
+
+        .confirmation-content {
+            text-align: left;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-content p {
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .caution-list {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .caution-list h3 {
+            color: #856404;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .caution-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .caution-list li {
+            color: #856404;
+            margin-bottom: 8px;
+            font-size: 13px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .caution-list li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-top: 1px solid #e0e6ff;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ジロー薬局</h1>
+            <div class="subtitle">緊急避妊薬事前チェック</div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-text">進捗状況: <span id="progressNum">1</span>/13</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Step 1: Welcome -->
+            <div class="step active" id="step1">
+                <h2>ジロー薬局へようこそ</h2>
+                <div class="form-group">
+                    <p style="margin-bottom: 16px; line-height: 1.8;">
+                        このフォームは、ノルレボ（緊急避妊薬）の服用前に必要な情報をお伺いするものです。
+                    </p>
+                    <div style="background-color: #f0f4ff; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
+                        <p style="font-weight: 600; color: #0066cc; margin-bottom: 8px;">ノルレボについて</p>
+                        <p style="font-size: 14px; line-height: 1.8;">
+                            ノルレボは、無防備な性交後72時間以内に服用することで、妊娠の可能性を低減させる緊急避妊薬です。
+                        </p>
+                        <p style="font-size: 14px; margin-top: 12px;">
+                            <span style="font-weight: 600;">金額:</span> 7,480円（税込）
+                        </p>
+                    </div>
+                    <p style="font-size: 14px; color: #666;">
+                        72時間以内のご使用をお勧めします。ご不明な点はスタッフまでお気軽にお尋ねください。
+                    </p>
+                </div>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Name -->
+            <div class="step" id="step2">
+                <h2>氏名</h2>
+                <div class="form-group">
+                    <label for="name">氏名 <span style="color: #e74c3c;">*</span></label>
+                    <input type="text" id="name" name="name" required placeholder="例: 山田 太郎">
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Age -->
+            <div class="step" id="step3">
+                <h2>年齢区分</h2>
+                <div class="form-group">
+                    <label>年齢区分 <span style="color: #e74c3c;">*</span></label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="u16" name="age" value="u16" onchange="checkAge()">
+                            <label for="u16">16歳未満</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="age16plus" name="age" value="16plus" onchange="checkAge()">
+                            <label for="age16plus">16歳以上</label>
+                        </div>
+                    </div>
+                    <div id="ageWarning" class="warning-box hidden">
+                        ⚠️ 16歳未満の場合、親権者の同意が必要です。スタッフにご相談ください。
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Period Start Date -->
+            <div class="step" id="step4">
+                <h2>最終月経開始日</h2>
+                <div class="form-group">
+                    <label for="periodDate">最終月経開始日 <span style="color: #e74c3c;">*</span></label>
+                    <input type="date" id="periodDate" name="periodDate" required>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Period Cycle -->
+            <div class="step" id="step5">
+                <h2>月経周期</h2>
+                <div class="form-group">
+                    <label for="periodCycle">月経周期 <span style="color: #e74c3c;">*</span></label>
+                    <select id="periodCycle" name="periodCycle" required>
+                        <option value="">選択してください</option>
+                        <option value="regular">規則的（25〜38日）</option>
+                        <option value="irregular">不規則</option>
+                        <option value="unknown">わからない</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Bleeding Amount -->
+            <div class="step" id="step6">
+                <h2>出血量</h2>
+                <div class="form-group">
+                    <label for="periodAmt">出血量 <span style="color: #e74c3c;">*</span></label>
+                    <select id="periodAmt" name="periodAmt" required>
+                        <option value="">選択してください</option>
+                        <option value="normal">普通</option>
+                        <option value="heavy">多い</option>
+                        <option value="light">少ない</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 7: Sex 3+ Weeks Ago -->
+            <div class="step" id="step7">
+                <h2>3週間以上前の性交</h2>
+                <div class="form-group">
+                    <label>3週間以上前に無防備な性交がありましたか？ <span style="color: #e74c3c;">*</span></label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="sex3wYes" name="sex3w" value="yes" onchange="checkSex3w()">
+                            <label for="sex3wYes">はい</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="sex3wNo" name="sex3w" value="no" onchange="checkSex3w()">
+                            <label for="sex3wNo">いいえ</label>
+                        </div>
+                    </div>
+                    <div id="sex3wWarning" class="warning-box hidden">
+                        ⚠️ 3週間以上前の性交がある場合、妊娠の可能性が高い場合があります。医師の診察をお勧めします。
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 8: Other Sex Within 3 Weeks -->
+            <div class="step" id="step8">
+                <h2>3週間以内の別の性交</h2>
+                <div class="form-group">
+                    <label>3週間以内に別の無防備な性交がありましたか？ <span style="color: #e74c3c;">*</span></label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="sex3oYes" name="sex3o" value="yes">
+                            <label for="sex3oYes">はい</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="sex3oNo" name="sex3o" value="no">
+                            <label for="sex3oNo">いいえ</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 9: Sex Worry Details -->
+            <div class="step" id="step9">
+                <h2>心配な性交の日時</h2>
+                <div class="form-group">
+                    <label for="sexWorry">心配な性交の日時（該当する場合のみ記入）</label>
+                    <textarea id="sexWorry" name="sexWorry" placeholder="例: 3月15日午後10時"></textarea>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 10: Prior EC Use -->
+            <div class="step" id="step10">
+                <h2>緊急避妊薬の使用歴</h2>
+                <div class="form-group">
+                    <label>過去に緊急避妊薬を使用したことがありますか？</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="priorUse" name="priorUse" value="yes">
+                            <label for="priorUse">はい、ある</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 11: Nursing -->
+            <div class="step" id="step11">
+                <h2>授乳中</h2>
+                <div class="form-group">
+                    <label>現在、授乳中ですか？</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="nursing" name="nursing" value="yes" onchange="checkNursing()">
+                            <label for="nursing">はい、授乳中です</label>
+                        </div>
+                    </div>
+                    <div id="nursingWarning" class="warning-box hidden">
+                        ⚠️ 授乳中の場合、ノルレボ服用後24時間は授乳を中止してください。
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 12: Japan in 3 Weeks -->
+            <div class="step" id="step12">
+                <h2>3週間後の在日状況</h2>
+                <div class="form-group">
+                    <label>3週間後に日本にいますか？ <span style="color: #e74c3c;">*</span></label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="japanYes" name="japan" value="yes">
+                            <label for="japanYes">はい</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="japanUncertain" name="japan" value="uncertain">
+                            <label for="japanUncertain">不明</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="nextStep()">次へ進む</button>
+                </div>
+            </div>
+
+            <!-- Step 13: Signature & Confirm -->
+            <div class="step" id="step13">
+                <h2>署名と確認</h2>
+                <div class="form-group">
+                    <p style="margin-bottom: 16px; font-size: 14px; color: #666;">
+                        以下の注意事項をご確認のうえ、署名欄に署名をしてください。
+                    </p>
+                </div>
+
+                <div class="caution-list">
+                    <h3>重要な注意事項</h3>
+                    <ul id="cautionsList">
+                        <li>ノルレボは72時間以内に服用してください</li>
+                        <li>この薬は確実な避妊ではありません</li>
+                        <li>副作用が生じる場合があります</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label>署名 <span style="color: #e74c3c;">*</span></label>
+                    <canvas id="signatureCanvas"></canvas>
+                    <div class="canvas-controls">
+                        <button onclick="clearSignature()">消す</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                            <label for="agreeTerms">上記の内容を確認し、同意します</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep()">戻る</button>
+                    <button class="btn-primary" onclick="submitForm()">申し込み完了</button>
+                </div>
+            </div>
+
+            <!-- Confirmation Section -->
+            <div class="confirmation-section" id="confirmationSection">
+                <h2>申し込み完了</h2>
+                <p style="margin-bottom: 20px; color: #666;">ご利用ありがとうございます</p>
+
+                <div class="receipt-number" id="receiptNumber">
+                    申し込み番号: EC20260410120000
+                </div>
+
+                <div class="confirmation-content">
+                    <p><span style="font-weight: 600;">電話番号:</span> 096-288-0783</p>
+                    <p><span style="font-weight: 600;">営業時間:</span> 平日9:00-18:00</p>
+                    <p style="margin-top: 16px;">72時間以内のご使用をお勧めします。ご不明な点はお気軽にお電話ください。</p>
+                </div>
+
+                <div class="caution-list">
+                    <h3>ご確認ください</h3>
+                    <ul id="confirmationCautions">
+                        <li>72時間以内に服用してください</li>
+                    </ul>
+                </div>
+
+                <button class="btn-primary" onclick="resetForm()" style="width: 100%; margin-top: 20px;">新しい申し込み</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>ジロー薬局 緊急避妊薬事前チェック</p>
+            <p style="margin-top: 8px;">© 2026 Jirou Pharmacy. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxuovABhEdLp2-mKHATkno5bIZQ14u6X6gJbAvPxriDcnLlcxcAuGZ8vRUBk1CH2JWT/exec';
+
+        let currentStep = 1;
+        let canvasInitialized = false;
+        let drawingContext = null;
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+        });
+
+        function updateUI() {
+            // Hide all steps
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => step.classList.remove('active'));
+
+            // Show current step
+            const currentStepEl = document.getElementById(`step${currentStep}`);
+            if (currentStepEl) {
+                currentStepEl.classList.add('active');
+            }
+
+            // Update progress bar
+            const progress = (currentStep / 13) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressNum').textContent = currentStep;
+
+            // Initialize canvas only when step 13 becomes visible
+            if (currentStep === 13 && !canvasInitialized) {
+                // Wait a tick for DOM to fully render
+                setTimeout(() => {
+                    setupSignatureCanvas();
+                }, 100);
+            }
+        }
+
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                currentStep++;
+                if (currentStep > 13) {
+                    currentStep = 13;
+                }
+                updateUI();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function prevStep() {
+            currentStep--;
+            if (currentStep < 1) {
+                currentStep = 1;
+            }
+            updateUI();
+            window.scrollTo(0, 0);
+        }
+
+        function validateStep(stepNum) {
+            switch(stepNum) {
+                case 2:
+                    if (!document.getElementById('name').value.trim()) {
+                        alert('氏名を入力してください');
+                        return false;
+                    }
+                    return true;
+                case 3:
+                    if (!document.querySelector('input[name="age"]:checked')) {
+                        alert('年齢区分を選択してください');
+                        return false;
+                    }
+                    return true;
+                case 4:
+                    if (!document.getElementById('periodDate').value) {
+                        alert('最終月経開始日を選択してください');
+                        return false;
+                    }
+                    return true;
+                case 5:
+                    if (!document.getElementById('periodCycle').value) {
+                        alert('月経周期を選択してください');
+                        return false;
+                    }
+                    return true;
+                case 6:
+                    if (!document.getElementById('periodAmt').value) {
+                        alert('出血量を選択してください');
+                        return false;
+                    }
+                    return true;
+                case 7:
+                    if (!document.querySelector('input[name="sex3w"]:checked')) {
+                        alert('3週間以上前の性交について選択してください');
+                        return false;
+                    }
+                    return true;
+                case 8:
+                    if (!document.querySelector('input[name="sex3o"]:checked')) {
+                        alert('3週間以内の別の性交について選択してください');
+                        return false;
+                    }
+                    return true;
+                case 12:
+                    if (!document.querySelector('input[name="japan"]:checked')) {
+                        alert('3週間後の在日状況を選択してください');
+                        return false;
+                    }
+                    return true;
+                case 13:
+                    if (!document.getElementById('agreeTerms').checked) {
+                        alert('注意事項に同意してください');
+                        return false;
+                    }
+                    if (!hasSignature()) {
+                        alert('署名をしてください');
+                        return false;
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        }
+
+        function checkAge() {
+            const ageWarning = document.getElementById('ageWarning');
+            const selected = document.querySelector('input[name="age"]:checked');
+            if (selected && selected.value === 'u16') {
+                ageWarning.classList.remove('hidden');
+            } else {
+                ageWarning.classList.add('hidden');
+            }
+        }
+
+        function checkSex3w() {
+            const warning = document.getElementById('sex3wWarning');
+            const selected = document.querySelector('input[name="sex3w"]:checked');
+            if (selected && selected.value === 'yes') {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
+
+        function checkNursing() {
+            const warning = document.getElementById('nursingWarning');
+            const checked = document.getElementById('nursing').checked;
+            if (checked) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
+
+        function setupSignatureCanvas() {
+            const canvas = document.getElementById('signatureCanvas');
+            if (!canvas) return;
+
+            // Remove old listeners if any
+            const newCanvas = canvas.cloneNode(true);
+            canvas.parentNode.replaceChild(newCanvas, canvas);
+            const newCanvasEl = document.getElementById('signatureCanvas');
+
+            // Set canvas size based on container
+            const rect = newCanvasEl.getBoundingClientRect();
+            newCanvasEl.width = Math.max(rect.width, 300);
+            newCanvasEl.height = 200;
+
+            drawingContext = newCanvasEl.getContext('2d');
+            drawingContext.lineCap = 'round';
+            drawingContext.lineJoin = 'round';
+            drawingContext.lineWidth = 2;
+            drawingContext.strokeStyle = '#333';
+
+            // Mouse events
+            newCanvasEl.addEventListener('mousedown', startDrawing);
+            newCanvasEl.addEventListener('mousemove', draw);
+            newCanvasEl.addEventListener('mouseup', stopDrawing);
+            newCanvasEl.addEventListener('mouseout', stopDrawing);
+
+            // Touch events
+            newCanvasEl.addEventListener('touchstart', handleTouchStart, false);
+            newCanvasEl.addEventListener('touchmove', handleTouchMove, false);
+            newCanvasEl.addEventListener('touchend', stopDrawing, false);
+
+            canvasInitialized = true;
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const canvas = document.getElementById('signatureCanvas');
+            const rect = canvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        }
+
+        function draw(e) {
+            if (!isDrawing || !drawingContext) return;
+
+            const canvas = document.getElementById('signatureCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            drawingContext.beginPath();
+            drawingContext.moveTo(lastX, lastY);
+            drawingContext.lineTo(x, y);
+            drawingContext.stroke();
+
+            lastX = x;
+            lastY = y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const canvas = document.getElementById('signatureCanvas');
+            const rect = canvas.getBoundingClientRect();
+            lastX = touch.clientX - rect.left;
+            lastY = touch.clientY - rect.top;
+            isDrawing = true;
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing || !drawingContext) return;
+
+            const touch = e.touches[0];
+            const canvas = document.getElementById('signatureCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            drawingContext.beginPath();
+            drawingContext.moveTo(lastX, lastY);
+            drawingContext.lineTo(x, y);
+            drawingContext.stroke();
+
+            lastX = x;
+            lastY = y;
+        }
+
+        function clearSignature() {
+            const canvas = document.getElementById('signatureCanvas');
+            if (canvas && drawingContext) {
+                drawingContext.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function hasSignature() {
+            const canvas = document.getElementById('signatureCanvas');
+            if (!canvas) return false;
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            return imageData.data.some(pixel => pixel !== 0);
+        }
+
+        function getFormData() {
+            const canvas = document.getElementById('signatureCanvas');
+            const signatureData = canvas ? canvas.toDataURL('image/png') : '';
+
+            const cautions = [];
+            if (document.getElementById('u16').checked) {
+                cautions.push('16歳未満であることを確認');
+            }
+            if (document.querySelector('input[name="sex3w"]:checked')?.value === 'yes') {
+                cautions.push('3週間以上前の性交があることを確認');
+            }
+            if (document.getElementById('nursing').checked) {
+                cautions.push('授乳中であることを確認 - 24時間の授乳中止が必要');
+            }
+
+            return {
+                name: document.getElementById('name').value,
+                age: document.querySelector('input[name="age"]:checked')?.value || '',
+                periodDate: document.getElementById('periodDate').value,
+                periodCycle: document.getElementById('periodCycle').value,
+                periodAmt: document.getElementById('periodAmt').value,
+                sex3w: document.querySelector('input[name="sex3w"]:checked')?.value || '',
+                sex3o: document.querySelector('input[name="sex3o"]:checked')?.value || '',
+                sexWorry: document.getElementById('sexWorry').value,
+                priorUse: document.getElementById('priorUse').checked,
+                nursing: document.getElementById('nursing').checked,
+                japan: document.querySelector('input[name="japan"]:checked')?.value || '',
+                cautions: cautions,
+                pregRisk: document.querySelector('input[name="sex3w"]:checked')?.value === 'yes',
+                signature: signatureData
+            };
+        }
+
+        function submitForm() {
+            if (!validateStep(13)) {
+                return;
+            }
+
+            const formData = getFormData();
+
+            // Show loading
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '送信中...';
+            btn.disabled = true;
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(() => {
+                showConfirmation(formData);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('送信エラーが発生しました。もう一度お試しください。');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        function showConfirmation(formData) {
+            // Generate receipt number: EC + yyyyMMddHHmmss
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const receiptNumber = `EC${year}${month}${day}${hours}${minutes}${seconds}`;
+
+            // Hide all steps
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => step.classList.remove('active'));
+
+            // Show confirmation
+            const confirmSection = document.getElementById('confirmationSection');
+            confirmSection.classList.add('active');
+
+            // Update receipt number
+            document.getElementById('receiptNumber').textContent = `申し込み番号: ${receiptNumber}`;
+
+            // Update cautions list in confirmation
+            const cautionsList = document.getElementById('confirmationCautions');
+            cautionsList.innerHTML = '';
+            const cautions = formData.cautions || [];
+            cautions.forEach(caution => {
+                const li = document.createElement('li');
+                li.textContent = caution;
+                cautionsList.appendChild(li);
+            });
+            if (cautions.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = '72時間以内に服用してください';
+                cautionsList.appendChild(li);
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function resetForm() {
+            // Reset all form fields
+            document.getElementById('name').value = '';
+            document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('periodDate').value = '';
+            document.getElementById('periodCycle').value = '';
+            document.getElementById('periodAmt').value = '';
+            document.getElementById('sexWorry').value = '';
+
+            // Hide confirmation section
+            document.getElementById('confirmationSection').classList.remove('active');
+
+            // Reset to step 1
+            currentStep = 1;
+            canvasInitialized = false;
+            updateUI();
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
