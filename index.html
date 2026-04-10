@@ -73,12 +73,16 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <!-- S0 -->
 <div class="st on" data-s="0"><div class="cd">
 <div class="sl">はじめに</div><div class="q">ご確認ください</div>
-<div class="ib" style="margin-top:0;margin-bottom:20px"><ul>
+<div class="ib" style="margin-top:0;margin-bottom:16px"><ul>
 <li>性交後<strong>72時間以内</strong>に服用が必要</li>
 <li>研修修了<strong>薬剤師の面前で服用</strong></li>
 <li><strong>ご本人のみ</strong>購入可能（代理不可）</li>
 <li>価格：<strong>7,480円（税込）</strong></li>
 </ul></div>
+<div style="background:var(--ng-bg);border:2px solid var(--ng);border-radius:12px;padding:14px;margin-bottom:20px;text-align:center">
+<p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">🔬 状況により、来局時に<br>妊娠検査薬による検査が必要です</p>
+<p style="font-size:12px;color:var(--txs);margin-top:4px">検査薬は薬局でご用意しています（880円・税込）</p>
+</div>
 <button class="b by" onclick="go(1)">理解しました</button>
 </div></div>
 
@@ -161,6 +165,10 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="bg" style="margin-bottom:16px"><button class="b bn sx" data-k="s3o" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="s3o" data-v="yes" onclick="pk(this)">あった</button></div>
 <label class="fl">③ 月経以降、今回より前に心配な性交が</label>
 <div class="bg" style="margin-bottom:16px"><button class="b bn sx" data-k="swr" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="swr" data-v="yes" onclick="pk(this)">あった</button></div>
+<div id="pregWarn" style="display:none;background:var(--ng-bg);border:2px solid var(--ng);border-radius:12px;padding:16px;margin-top:16px;text-align:center;animation:fi .3s ease">
+<p style="font-size:16px;font-weight:700;color:var(--ng);line-height:1.7">🔬 妊娠検査薬による検査が必要です</p>
+<p style="font-size:13px;color:var(--txs);margin-top:6px;line-height:1.6">既に妊娠している可能性を否定するため、<br>来局時に妊娠検査薬を使用していただきます。<br>（検査薬：880円・税込）</p>
+</div>
 <button class="nxt" id="sxN" disabled onclick="if(D.sx.s3w==='yes'||D.sx.swr==='yes')D.pr=true;go(11)">次へ</button>
 </div></div>
 
@@ -190,6 +198,10 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <label class="fl">お名前（カタカナ）</label>
 <input type="text" class="fi" id="uName" placeholder="ヤマダ ハナコ">
 
+<label class="fl">来局予定日時（任意）</label>
+<input type="datetime-local" class="fi" id="visitTime" style="margin-bottom:2px">
+<p style="font-size:11px;color:#aaa;margin-bottom:10px">未定の場合は空欄でOKです</p>
+
 <label class="fl">署名（指でサイン）</label>
 <div class="sig-wrap" id="sigW"><canvas id="sigC" height="150"></canvas><button class="sig-clear" onclick="clrSig()">クリア</button></div>
 <div class="sig-label">↑ 指またはペンで署名</div>
@@ -207,6 +219,9 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="ib" style="margin-top:0"><ul><li>お電話いただくとスムーズです</li><li>飲用水はご用意しています</li><li>プライバシー配慮の個別対応です</li></ul></div>
 <a href="tel:096-288-0783" class="tl">📞 096-288-0783 に電話する</a>
 </div>
+<div class="cd" id="pregC" style="display:none;margin-top:16px;border:2px solid var(--ng)">
+<h3 style="font-size:15px;color:var(--ng);margin-bottom:8px">🔬 妊娠検査薬による検査が必要です</h3>
+<p style="font-size:13px;color:var(--txs);line-height:1.7">既に妊娠している可能性を否定するため、<strong>来局時に妊娠検査薬を使用</strong>していただきます。<br>検査薬は薬局でご用意しています（880円・税込）。</p></div>
 <div class="cd" id="nurC" style="display:none;margin-top:16px">
 <h3 style="font-size:14px;color:var(--warn);margin-bottom:8px">🍼 授乳中の方へ</h3>
 <p style="font-size:13px;color:var(--txs);line-height:1.7">服用後<strong>24時間は授乳を避けて</strong>ください。</p></div>
@@ -273,7 +288,8 @@ const NGs={proxy:{i:'❌',t:'購入できません',x:'<strong>ご本人のみ</
 function showNG(k){hideAll();document.getElementById('pbar').style.display='none';const m=NGs[k];document.getElementById('nI').textContent=m.i;document.getElementById('nT').innerHTML=m.t;document.getElementById('nX').innerHTML=m.x;document.getElementById('nA').innerHTML=m.a;document.querySelector('[data-s="ng"]').classList.add('on');window.scrollTo({top:0,behavior:'smooth'})}
 
 function saveCk(){const m={c1:'心臓病',c2:'腎臓病',c3:'重度消化器疾患',c4:'医師治療中',c5:'薬アレルギー歴',c6:'セントジョーンズワート',c7:'常用薬/健康食品'};Object.entries(m).forEach(([id,lb])=>{if(document.getElementById(id).checked)D.ct.push(lb)})}
-function pk(btn){const k=btn.dataset.k,v=btn.dataset.v;D.sx[k]=v;btn.parentElement.querySelectorAll('.sx').forEach(b=>{b.classList.remove('chosen','sel');b.classList.add(b.dataset.v===v?'chosen':'sel')});if(D.sx.s3w&&D.sx.s3o&&D.sx.swr)document.getElementById('sxN').disabled=false}
+function pk(btn){const k=btn.dataset.k,v=btn.dataset.v;D.sx[k]=v;btn.parentElement.querySelectorAll('.sx').forEach(b=>{b.classList.remove('chosen','sel');b.classList.add(b.dataset.v===v?'chosen':'sel')});if(D.sx.s3w&&D.sx.s3o&&D.sx.swr)document.getElementById('sxN').disabled=false;
+const w=document.getElementById('pregWarn');if(w)w.style.display=(D.sx.s3w==='yes'||D.sx.swr==='yes')?'block':'none'}
 
 const yn=v=>v==='yes'?'あり':'なし';
 function getLines(){return[
@@ -285,9 +301,10 @@ function getLines(){return[
   `3週間後の日本滞在：${D.jp?'はい':'不明'}`
 ]}
 function buildPvw(){
-  let h=getLines().join('<br>');
+  const vt=document.getElementById('visitTime').value;
+  let h=getLines().join('<br>')+(vt?'<br><strong>来局予定：</strong>'+vt.replace('T',' '):'');
   if(D.ct.length)h+='<br><br><strong>注意事項：</strong>'+D.ct.join('、');
-  if(D.pr)h+='<br><br><strong style="color:var(--ng)">⚠ 妊娠の可能性あり → 来局時に検査薬が必要な場合があります</strong>';
+  if(D.pr)h+='</div><div style="background:var(--ng-bg);border:2px solid var(--ng);border-radius:10px;padding:14px;margin-top:12px;text-align:center"><p style="font-size:16px;font-weight:700;color:var(--ng)">🔬 妊娠検査薬による検査が必要です</p><p style="font-size:12px;color:var(--txs);margin-top:4px">既に妊娠している可能性を否定するための検査です</p>';
   document.getElementById('pvw').innerHTML=h;
   initSig();
 }
@@ -319,8 +336,9 @@ async function submit(){
   const elapsed=Date.now()-startTime;
   if(elapsed<10000){alert('入力が早すぎます。もう一度お試しください。');ovl.classList.remove('on');return;}
 
+  const visitTime=document.getElementById('visitTime').value||'';
   const payload={
-    name, signature:sig, age:D.age,
+    name, visitTime, signature:sig, age:D.age,
     periodDate:D.pd, periodCycle:D.pc, periodAmt:D.pa,
     sex3w:D.sx.s3w, sex3o:D.sx.s3o, sexWorry:D.sx.swr,
     priorUse:D.pu, nursing:D.nursing, japan:D.jp,
@@ -359,6 +377,7 @@ async function submit(){
     ovl.classList.remove('on');hideAll();
     document.getElementById('pbar').style.display='none';
     document.getElementById('rcpId').textContent=rcpId;
+    if(D.pr)document.getElementById('pregC').style.display='block';
     if(D.nursing)document.getElementById('nurC').style.display='block';
     document.querySelector('[data-s="ok"]').classList.add('on');
     window.scrollTo({top:0,behavior:'smooth'});
