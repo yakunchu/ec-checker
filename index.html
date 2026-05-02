@@ -6,6 +6,8 @@
 <title>緊急避妊薬 事前確認 | ジロー薬局</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Cloudflare Turnstile (Bot対策・第3課 2026-05-02) -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
 :root{--pri:#5B7B8A;--pri-l:#E8F0F4;--pri-d:#3D5A6A;--acc:#D4876C;--ng:#C85A54;--ng-bg:#FFF0EF;--ok:#5A8A6B;--ok-bg:#EDFBF2;--warn:#B8863B;--warn-bg:#FFF8ED;--bg:#FAFBFC;--card:#FFF;--tx:#2D3436;--txs:#636E72;--bd:#E5E9EC;--sh:0 2px 12px rgba(0,0,0,.06)}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -225,6 +227,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="sig-label">↑ 指またはペンで署名</div>
 
 <input type="text" id="hp_email" name="email" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;opacity:0;height:0">
+<!-- Cloudflare Turnstile widget (第3課 2026-05-02 本番キー) -->
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADHkWVJdzrHtJBMm" data-theme="light" style="margin:12px 0;display:flex;justify-content:center"></div>
 <button class="nxt" id="subBtn" disabled onclick="submit()">✉️ 薬局に送信する</button>
 </div></div>
 
@@ -361,6 +365,16 @@ async function submit(){
   const elapsed=Date.now()-startTime;
   if(elapsed<10000){alert('入力が早すぎます。もう一度お試しください。');ovl.classList.remove('on');return;}
 
+  // Cloudflare Turnstile トークン取得（第3課 2026-05-02）
+  let turnstileToken='';
+  try{
+    if(typeof turnstile!=='undefined'){turnstileToken=turnstile.getResponse()||'';}
+  }catch(e){console.warn('Turnstile取得エラー',e);}
+  if(!turnstileToken){
+    alert('セキュリティチェックが未完了です。\nしばらく待ってから再度お試しください。\n問題が続く場合はお電話でも受付可能です。');
+    ovl.classList.remove('on');return;
+  }
+
   const visitTime=document.getElementById('visitTime').value||'';
   const payload={
     name, visitTime, signature:sig, age:D.age,
@@ -368,7 +382,8 @@ async function submit(){
     sex3w:D.sx.s3w, sex3o:D.sx.s3o, sexWorry:D.sx.swr,
     priorUse:D.pu, nursing:D.nursing, japan:D.jp,
     cautions:D.ct, pregRisk:D.pr,
-    _key:SEC_KEY, _ts:elapsed
+    _key:SEC_KEY, _ts:elapsed,
+    cf_turnstile_token:turnstileToken
   };
 
   let rcpId='EC-'+Date.now().toString(36).toUpperCase();
