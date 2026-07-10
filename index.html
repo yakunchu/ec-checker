@@ -375,6 +375,16 @@ async function submit(){
     ovl.classList.remove('on');return;
   }
 
+  // 日付の整合チェック（過去の来局予定・未来の月経開始日をブロック 2026-07-03）
+  const p2=n=>String(n).padStart(2,'0');
+  const _t=new Date();
+  const todayStr=`${_t.getFullYear()}-${p2(_t.getMonth()+1)}-${p2(_t.getDate())}`;
+  const nowStr=`${todayStr}T${p2(_t.getHours())}:${p2(_t.getMinutes())}`;
+  const lpv=document.getElementById('lp').value;
+  if(lpv && lpv>todayStr){alert('月経開始日が未来の日付になっています。ご確認ください。');ovl.classList.remove('on');return;}
+  const vtv=document.getElementById('visitTime').value;
+  if(vtv && vtv<nowStr){alert('来局予定の日時が過去になっています。ご確認ください。');ovl.classList.remove('on');return;}
+
   const visitTime=document.getElementById('visitTime').value||'';
   const payload={
     name, visitTime, signature:sig, age:D.age,
@@ -386,18 +396,32 @@ async function submit(){
     cf_turnstile_token:turnstileToken
   };
 
-  let rcpId='EC-'+Date.now().toString(36).toUpperCase();
-
+  // 送信（2026-07-03改修: サーバー受理を確認できた場合のみ完了画面へ。
+  //  失敗時は偽の受付番号を出さず、電話案内＋再送可能にする。20秒タイムアウト付き）
+  const subBtn=document.getElementById('subBtn');
+  subBtn.disabled=true;  // 二重送信防止（失敗時のみ再有効化）
+  let rcpId='';
+  let sendOk=false;
   try{
     if(GAS_URL && GAS_URL!=='YOUR_GAS_DEPLOY_URL_HERE'){
-      const res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}});
+      const ctrl=new AbortController();
+      const tmr=setTimeout(()=>ctrl.abort(),20000);
+      const res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'},signal:ctrl.signal});
+      clearTimeout(tmr);
       const json=await res.json();
-      if(json.success && json.id) rcpId=json.id;
+      if(res.ok && json.success===true && json.id){rcpId=json.id;sendOk=true;}
     }
-  }catch(e){console.warn('GAS送信エラー、ローカル保存に切替:',e)}
+  }catch(e){console.warn('GAS送信エラー:',e)}
 
-  // ローカル保存（バックアップ）
-  try{const r=JSON.parse(localStorage.getItem('ec_records')||'[]');r.push({...payload,id:rcpId,time:new Date().toLocaleString('ja-JP')});localStorage.setItem('ec_records',JSON.stringify(r))}catch(e){}
+  if(!sendOk){
+    document.getElementById('ovlSpin').style.display='none';
+    document.getElementById('ovlIcon').style.display='block';
+    document.getElementById('ovlIcon').textContent='📞';
+    document.getElementById('ovlMsg').textContent='送信できませんでした';
+    document.getElementById('ovlSub').textContent='お手数ですが、お電話でご連絡ください: 096-288-0783（電波の良い場所で、もう一度「送信」を押していただくこともできます）';
+    setTimeout(()=>{ovl.classList.remove('on');subBtn.disabled=false;},8000);
+    return;
+  }
 
   // 印刷用データ
   const now=new Date().toLocaleString('ja-JP');
@@ -432,9 +456,21 @@ document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
 document.querySelectorAll('.sx').forEach(b=>{b.classList.remove('chosen','sel')});
 document.getElementById('sxN').disabled=true;document.getElementById('subBtn').disabled=true;
 document.getElementById('nurC').style.display='none';
+document.getElementById('s3oC').style.display='none';document.getElementById('pregC').style.display='none';
+document.getElementById('prBody').innerHTML='';document.getElementById('prSig').src='';
+document.getElementById('prTime').textContent='';document.getElementById('prId').textContent='';
+document.getElementById('rcpId').textContent='';
+const _pv=document.getElementById('pvw');if(_pv)_pv.innerHTML='';
 document.getElementById('pbar').style.display='flex';go(0)}
 
 initBar();updBar(0);
+// 日付入力の論理制約（月経開始日=今日まで / 来局予定=今以降 2026-07-03）
+(function(){
+  const z=n=>String(n).padStart(2,'0');
+  const t=new Date();
+  document.getElementById('lp').max=`${t.getFullYear()}-${z(t.getMonth()+1)}-${z(t.getDate())}`;
+  document.getElementById('visitTime').min=`${t.getFullYear()}-${z(t.getMonth()+1)}-${z(t.getDate())}T${z(t.getHours())}:${z(t.getMinutes())}`;
+})();
 </script>
 </body>
 </html>
