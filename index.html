@@ -5,90 +5,137 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>緊急避妊薬 事前確認 | ジロー薬局</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
 <!-- Cloudflare Turnstile (Bot対策・第3課 2026-05-02) -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
-:root{--pri:#5B7B8A;--pri-l:#E8F0F4;--pri-d:#3D5A6A;--acc:#D4876C;--ng:#C85A54;--ng-bg:#FFF0EF;--ok:#5A8A6B;--ok-bg:#EDFBF2;--warn:#B8863B;--warn-bg:#FFF8ED;--bg:#FAFBFC;--card:#FFF;--tx:#2D3436;--txs:#636E72;--bd:#E5E9EC;--sh:0 2px 12px rgba(0,0,0,.06)}
+/* ============================================================
+   緊急避妊薬 事前確認 — ジローブルー（2026-10-27 Claude Design A案）
+   見た目だけの変更。質問・説明文・送信処理（下の script）は変えていない。
+   ============================================================ */
+:root{
+  --ai:#165e83;--ai-h:#0f4560;--shiroai:#c1e4e9;--ink:#16233d;--muted:#4a5a74;--line:#d3dce7;--surface:#f4f7fa;--akane:#b7282e;--ok-c:#1f6b3e;
+  /* 下の script が参照する変数（値はジローブルーに合わせた） */
+  --pri:#165e83;--pri-l:#eaf4f7;--pri-d:#0f4560;--ng:#b7282e;--ng-bg:#fdf1f1;--ok:#1f6b3e;--ok-bg:#e6f6ec;--warn:#b7282e;--warn-bg:#ffffff;--tx:#16233d;--txs:#4a5a74;--bd:#d3dce7
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;-webkit-font-smoothing:antialiased}
-.wrap{max-width:480px;margin:0 auto;padding:0 16px 40px}
-.hd{background:linear-gradient(135deg,var(--pri),var(--pri-d));padding:28px 20px 24px;text-align:center;color:#fff;margin:0 -16px;border-radius:0 0 24px 24px;margin-bottom:20px}
-.hd .pn{font-size:12px;letter-spacing:2px;opacity:.85;margin-bottom:8px}
-.hd h1{font-size:19px;font-weight:700;line-height:1.5;margin-bottom:6px}
-.hd .sub{font-size:12px;opacity:.8;line-height:1.6}
-.pb{display:flex;gap:3px;margin:0 4px 20px}.pd{flex:1;height:4px;border-radius:2px;background:var(--bd);transition:background .4s}.pd.a{background:var(--pri)}.pd.d{background:var(--ok)}
-.st{display:none;animation:fi .3s ease}.st.on{display:block}
-@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.cd{background:var(--card);border-radius:16px;padding:24px 20px;box-shadow:var(--sh);border:1px solid var(--bd);margin-bottom:16px}
-.sl{display:inline-block;font-size:11px;font-weight:700;color:var(--pri);background:var(--pri-l);padding:4px 12px;border-radius:20px;margin-bottom:12px;letter-spacing:1px}
-.q{font-size:17px;font-weight:700;line-height:1.65;margin-bottom:8px}
-.qn{font-size:13px;color:var(--txs);line-height:1.65;margin-bottom:20px}
-.bg{display:flex;flex-direction:column;gap:10px}
-.b{display:block;width:100%;padding:15px 18px;border:2px solid var(--bd);border-radius:12px;background:#fff;font-family:inherit;font-size:15px;font-weight:500;color:var(--tx);cursor:pointer;transition:all .2s;text-align:center;-webkit-tap-highlight-color:transparent}
-.b:active{transform:scale(.97)}
-.by{border-color:var(--pri);color:var(--pri-d);background:var(--pri-l)}
-.bn{border-color:var(--bd);color:var(--txs)}
-.bng{border-color:var(--ng);color:var(--ng);background:var(--ng-bg)}
-.bw{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
-.nxt{background:var(--pri);color:#fff;border:none;padding:16px;border-radius:12px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:all .2s;margin-top:16px}
-.nxt:disabled{background:#B8C8D0;cursor:not-allowed}
-.rc{border-radius:16px;padding:28px 20px;text-align:center;border:2px solid}
-.rc.rok{background:var(--ok-bg);border-color:var(--ok)}.rc.rng{background:var(--ng-bg);border-color:var(--ng)}
-.ri{font-size:48px;margin-bottom:12px}
-.rt{font-size:18px;font-weight:700;margin-bottom:8px}
-.rc.rok .rt{color:var(--ok)}.rc.rng .rt{color:var(--ng)}
-.rtx{font-size:14px;color:var(--txs);line-height:1.7;margin-bottom:20px}
-.ib{background:var(--pri-l);border-radius:12px;padding:16px;margin-top:16px;text-align:left}
-.ib ul{list-style:none;padding:0}.ib ul li{padding-left:16px;position:relative;margin-bottom:4px;font-size:13px;color:var(--txs);line-height:1.7}
-.ib ul li::before{content:'•';position:absolute;left:0;color:var(--pri);font-weight:bold}
-.tl{display:block;margin-top:10px;padding:14px;background:var(--acc);color:#fff;text-decoration:none;border-radius:10px;font-size:15px;font-weight:700;text-align:center}
-.lb{display:block;margin-top:12px;padding:14px 16px;background:var(--pri);color:#fff;text-decoration:none;border-radius:10px;font-size:14px;font-weight:700;text-align:center}
-.rb{display:block;margin:24px auto 0;padding:12px 24px;background:none;border:1px solid var(--bd);border-radius:10px;font-family:inherit;font-size:13px;color:var(--txs);cursor:pointer}
-.ft{text-align:center;padding:24px 16px;font-size:11px;color:#999;line-height:1.8}
-.fi{width:100%;padding:14px 12px;border:2px solid var(--bd);border-radius:10px;font-family:inherit;font-size:15px;color:var(--tx);background:#fff;appearance:none;-webkit-appearance:none;margin-bottom:10px}
-.fi:focus{outline:none;border-color:var(--pri)}
-select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23636E72' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
-.fl{font-size:13px;color:var(--txs);margin-bottom:6px;display:block;font-weight:500}
-.ci{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd)}.ci:last-child{border-bottom:none}
-.ci label{font-size:14px;line-height:1.6;flex:1;cursor:pointer}
-.ci input[type=checkbox]{width:22px;height:22px;margin-top:2px;accent-color:var(--pri);cursor:pointer;flex-shrink:0}
-.sel{opacity:.4;transform:scale(.96)}.chosen{opacity:1;transform:scale(1);border-width:3px}
-.sig-wrap{border:2px dashed var(--bd);border-radius:12px;background:#FAFBFC;position:relative;touch-action:none;margin-bottom:8px}
+body{font-family:'BIZ UDPGothic','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;background:var(--surface);color:var(--ink);font-size:16px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button,input,select{font-family:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px #2792c3}
+.app-header{height:56px;padding:0 16px;display:flex;align-items:center;gap:10px;background:#fff;border-bottom:1px solid var(--line)}
+.brand{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;font-size:19px;font-weight:700;letter-spacing:.02em;color:var(--ai)}
+.brand-sub{font-size:13px;color:var(--muted)}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px 24px}
+.pb{display:flex;gap:2px;margin:0 -16px 16px}
+.pd{flex:1;height:6px;background:var(--line);transition:background-color .3s}
+.pd.a,.pd.d{background:var(--ai)}
+.st{display:none;animation:fi .25s ease}.st.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.cd{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 2px #16233d14,0 2px 8px #16233d0f;margin-bottom:16px}
+.ttl{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;font-size:25px;line-height:36px;font-weight:700;letter-spacing:.02em}
+.lead{font-size:15px;line-height:26px;color:var(--muted);margin:6px 0 16px}
+.h2{font-size:18px;line-height:28px;font-weight:700;margin-bottom:12px}
+.sl{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--ai);margin-bottom:6px}
+.q{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;font-size:23px;line-height:34px;font-weight:700;letter-spacing:.02em;margin-bottom:8px}
+.qn{font-size:15px;line-height:26px;color:var(--muted);margin-bottom:8px}
+.bg{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.b{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:64px;padding:0 18px;border:1px solid var(--muted);border-radius:12px;background:#fff;font-size:19px;font-weight:700;color:var(--ink);cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;transition:background-color .15s}
+.b::after{content:'';width:22px;height:22px;flex:0 0 22px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23165e83' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 5 7 7-7 7'/%3E%3C/svg%3E") no-repeat center/22px}
+.b:active{background:#eaf4f7}
+.bg2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 16px}
+.b.sx{min-height:56px;justify-content:center;padding:0 10px;font-size:17px}
+.b.sx::after{display:none}
+.b.sx.chosen{border:2px solid var(--ai);background:var(--ai);color:#fff}
+.nxt{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;margin-top:16px;border:0;border-radius:12px;background:var(--ai);color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:background-color .15s}
+.nxt:active:not(:disabled){background:var(--ai-h)}
+.nxt:disabled{background:#e2e7ee;color:var(--muted);cursor:not-allowed}
+.bk{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-bottom:6px;padding:0;border:0;background:none;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer}
+.bk::before{content:'';width:18px;height:18px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5a74' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5'/%3E%3Cpath d='m12 19-7-7 7-7'/%3E%3C/svg%3E") no-repeat center/18px}
+.fl{display:block;font-size:16px;font-weight:700;margin:14px 0 6px}
+.fi{display:block;width:100%;min-height:52px;padding:0 14px;border:1px solid var(--muted);border-radius:6px;background:#fff;font-size:18px;color:var(--ink);appearance:none;-webkit-appearance:none}
+.fi:focus{outline:none;border-color:var(--ai);box-shadow:0 0 0 3px #165e8326}
+select.fi{font-weight:700;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23165e83' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:20px;padding-right:44px}
+.hint{font-size:13px;line-height:20px;color:var(--muted);margin-top:6px}
+.ci{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 14px;margin-bottom:8px;border:1px solid var(--muted);border-radius:12px;background:#fff}
+.ci:has(input:checked){border:2px solid var(--ai)}
+.ci label{flex:1;padding:12px 0;font-size:17px;line-height:1.5;cursor:pointer}
+.ci input[type=checkbox]{width:24px;height:24px;flex:0 0 24px;accent-color:var(--ai);cursor:pointer}
+.ci.agree{align-items:flex-start;padding:14px 16px}
+.ci.agree input[type=checkbox]{width:28px;height:28px;flex:0 0 28px;margin-top:0}
+.ci.agree label{padding:0;font-size:15px;line-height:25px}
+.list{list-style:none;display:flex;flex-direction:column;gap:12px}
+.list li{display:flex;gap:12px;align-items:flex-start;font-size:16px;line-height:26px}
+.ico{width:36px;height:36px;flex:0 0 36px;border-radius:9999px;background:var(--shiroai);display:inline-flex;align-items:center;justify-content:center}
+.info{border-radius:12px;background:var(--shiroai);padding:12px 14px;display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:23px;margin-bottom:16px}
+.info svg{flex:0 0 auto;margin-top:2px}
+.alert{border:2px solid var(--akane);border-radius:12px;background:#fff;padding:14px 16px;margin-top:16px}
+.alert-t{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--akane);line-height:1.6}
+.alert p{font-size:15px;line-height:25px}
+.pvw{background:var(--surface);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:15px;line-height:1.9;color:var(--ink)}
+.sig-wrap{position:relative;border:2px solid var(--muted);border-radius:12px;background:#fff;touch-action:none;margin-bottom:6px}
 .sig-wrap canvas{display:block;width:100%;border-radius:10px}
-.sig-clear{position:absolute;top:8px;right:8px;background:var(--pri-l);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--txs);cursor:pointer;font-family:inherit}
-.sig-label{text-align:center;font-size:11px;color:#aaa;margin-bottom:12px}
-.ovl{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:999}
+.sig-clear{position:absolute;top:8px;right:8px;min-height:36px;padding:0 12px;border:1px solid var(--muted);border-radius:9999px;background:#fff;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}
+.sig-label{font-size:13px;line-height:20px;color:var(--muted);margin-bottom:12px}
+.done-head{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:12px 0 16px}
+.check{width:60px;height:60px;border-radius:9999px;background:var(--ok-c);color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.big{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;font-size:24px;line-height:34px;font-weight:700;letter-spacing:.02em}
+.sub{font-size:15px;line-height:25px;color:var(--muted)}
+.rcp-l{display:block;font-size:13px;font-weight:700;color:var(--muted)}
+.rcp{display:block;font-size:26px;line-height:34px;font-weight:700;color:var(--ai);letter-spacing:.04em;font-variant-numeric:tabular-nums;margin-bottom:12px}
+.strong-line{padding-top:12px;border-top:1px solid var(--line);font-size:17px;line-height:28px;font-weight:700;margin-bottom:12px}
+.tel-p{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;border-radius:12px;background:var(--ai);color:#fff;font-size:18px;font-weight:700;text-decoration:none}
+.tel-s{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 14px;border:1px solid var(--muted);border-radius:12px;background:#fff;color:var(--ink);font-size:16px;font-weight:700;text-decoration:none;margin-top:10px}
+.tel-s.center{justify-content:center}
+.oks{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:14px;font-size:15px;line-height:24px}
+.oks li{display:flex;gap:8px;align-items:flex-start}
+.oks svg{flex:0 0 auto;margin-top:3px}
+.panel-blue{border-radius:12px;background:var(--shiroai);padding:14px 16px;margin-bottom:16px}
+.panel-h{display:flex;align-items:center;gap:8px;font-size:16px;line-height:26px;font-weight:700;margin-bottom:6px}
+.panel-blue p,.cd p.body{font-size:15px;line-height:25px}
+.small{font-size:13px;line-height:21px;color:var(--muted)}
+.ng-t{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ng-t #nT{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;font-size:23px;line-height:32px;font-weight:700;color:var(--akane)}
+#nX{font-size:17px;line-height:28px}
+#nI{display:none}
+.rb{display:block;margin:8px auto 0;min-height:44px;padding:0 16px;border:0;background:none;font-size:14px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ft{text-align:center;padding:20px 8px 8px;font-size:12px;line-height:1.8;color:var(--muted)}
+.ovl{position:fixed;inset:0;background:rgba(22,35,61,.55);display:none;align-items:center;justify-content:center;z-index:999;padding:20px}
 .ovl.on{display:flex}
-.ovl-box{background:#fff;border-radius:16px;padding:32px 24px;text-align:center;max-width:320px;width:90%}
-.spinner{width:40px;height:40px;border:4px solid var(--bd);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+.ovl-box{background:#fff;border-radius:12px;padding:28px 22px;text-align:center;max-width:340px;width:100%}
+#ovlIcon{display:none!important}
+.spinner{width:56px;height:56px;border:6px solid var(--shiroai);border-top-color:var(--ai);border-right-color:var(--ai);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media print{body{background:#fff}.hd,.pb,.rb,.tl,.lb,.ft,.ovl{display:none!important}.wrap{max-width:100%;padding:0}.cd{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.st{display:none!important}.st[data-s="print"]{display:block!important}.print-only{display:block!important}}
-.bk{display:inline-block;padding:10px 0;font-family:inherit;font-size:13px;color:var(--txs);background:none;border:none;cursor:pointer;margin-bottom:8px}
-.bk:before{content:'← ';font-size:12px}
+@media (prefers-reduced-motion:reduce){.st{animation:none}.spinner{animation:none}.b,.nxt,.pd{transition:none}}
+@media print{body{background:#fff}.app-header,.pb,.rb,.tel-p,.tel-s,.ft,.ovl{display:none!important}.wrap{max-width:100%;padding:0}.cd{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.st{display:none!important}.st[data-s="print"]{display:block!important}.print-only{display:block!important}}
 .print-only{display:none}
 </style>
 </head>
 <body>
-<div class="hd"><div class="pn">ジロー薬局</div><h1>緊急避妊薬（ノルレボ）<br>事前確認チェック</h1><div class="sub">来局前にすべての確認を完了できます<br>※最終判断は薬剤師が行います</div></div>
+<header class="app-header"><span class="brand">ジロー薬局</span><span class="brand-sub">緊急避妊薬の事前確認</span></header>
 <div class="wrap">
 <div class="pb" id="pbar"></div>
 
 <!-- S0 -->
-<div class="st on" data-s="0"><div class="cd">
-<div class="sl">はじめに</div><div class="q">ご確認ください</div>
-<div class="ib" style="margin-top:0;margin-bottom:16px"><ul>
-<li>性交後<strong>72時間以内</strong>に服用が必要</li>
-<li>研修修了<strong>薬剤師の面前で服用</strong></li>
-<li><strong>ご本人のみ</strong>購入可能（代理不可）</li>
-<li>価格：<strong>7,480円（税込）</strong></li>
-</ul></div>
-<div style="background:var(--ng-bg);border:2px solid var(--ng);border-radius:12px;padding:14px;margin-bottom:20px;text-align:center">
-<p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">🔬 ご状況によっては妊娠検査が必要になる場合があります</p>
-<p style="font-size:12px;color:var(--txs);margin-top:6px;line-height:1.6">事前にご自身で検査するか、薬局にて検査していただきます<br>（検査薬1本 880円税込）<br>※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</p>
+<div class="st on" data-s="0">
+<h1 class="ttl" style="margin-top:4px">緊急避妊薬（ノルレボ）<br>事前確認チェック</h1>
+<p class="lead">来局前に、確認をすべて済ませておけます。<br>※最終判断は薬剤師が行います</p>
+<div class="cd">
+<h2 class="h2">はじめにご確認ください</h2>
+<ul class="list">
+<li><span class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span>性交後<strong>72時間以内</strong>に服用が必要</span></li>
+<li><span class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></span><span>研修修了<strong>薬剤師の面前で服用</strong></span></li>
+<li><span class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span><strong>ご本人のみ</strong>購入可能（代理不可）</span></li>
+<li><span class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/></svg></span><span>価格：<strong>7,480円（税込）</strong></span></li>
+</ul>
 </div>
-<button class="b by" onclick="go(1)">理解しました</button>
-</div></div>
+<div class="cd">
+<div class="panel-h"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v6L5 18a2 2 0 0 0 1.7 3h10.6A2 2 0 0 0 19 18l-5-9V3"/></svg>ご状況によっては妊娠検査が必要になる場合があります</div>
+<p class="body">事前にご自身で検査するか、薬局にて検査していただきます（検査薬1本 880円税込）</p>
+<p class="body" style="font-weight:700;margin-top:4px">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</p>
+</div>
+<div class="info"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>質問は13問です。薬局ではプライバシーに配慮して、個別に対応します。</span></div>
+<button class="nxt" onclick="go(1)">理解しました・はじめる<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+</div>
 
 <!-- S1 -->
 <div class="st" data-s="1"><div class="cd">
@@ -139,7 +186,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="st" data-s="7"><div class="cd">
 <button class="bk" onclick="go(6)">戻る</button>
 <div class="sl">チェック 7/13</div><div class="q">以下に該当するものは？</div>
-<div class="qn">該当があっても薬剤師相談で服用できる場合があります。</div>
+<div class="qn">該当があっても薬剤師相談で服用できる場合があります。あてはまるものをすべて選んでください。</div>
+<div style="margin-top:12px">
 <div class="ci"><input type="checkbox" id="c1"><label for="c1">心臓病</label></div>
 <div class="ci"><input type="checkbox" id="c2"><label for="c2">腎臓病</label></div>
 <div class="ci"><input type="checkbox" id="c3"><label for="c3">重度の消化器疾患</label></div>
@@ -147,6 +195,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="ci"><input type="checkbox" id="c5"><label for="c5">薬アレルギー歴</label></div>
 <div class="ci"><input type="checkbox" id="c6"><label for="c6">セント・ジョーンズ・ワート摂取</label></div>
 <div class="ci"><input type="checkbox" id="c7"><label for="c7">常用薬・健康食品あり</label></div>
+</div>
+<p class="hint">あてはまるものが無いときは、何も選ばずに「次へ」を押してください。</p>
 <button class="nxt" onclick="saveCk();go(8)">次へ</button>
 </div></div>
 
@@ -161,10 +211,10 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="st" data-s="9"><div class="cd">
 <button class="bk" onclick="go(8)">戻る</button>
 <div class="sl">チェック 9/13</div><div class="q">直近の月経（生理）について</div>
-<label class="fl">月経開始日</label><input type="date" class="fi" id="lp">
-<label class="fl">月経周期</label>
+<label class="fl" for="lp">月経開始日</label><input type="date" class="fi" id="lp">
+<label class="fl" for="pc">月経周期</label>
 <select class="fi" id="pc"><option value="">選択</option><option value="整">整（25〜38日）</option><option value="不整">不整</option><option value="不明">わからない</option><option value="産後未再開">出産/流産後 未再開</option></select>
-<label class="fl">出血量（通常比）</label>
+<label class="fl" for="pa">出血量（通常比）</label>
 <select class="fi" id="pa"><option value="">選択</option><option value="変わらない">変わらない</option><option value="少なかった">少なかった</option><option value="多かった">多かった</option><option value="期間短">期間が短かった</option><option value="期間長">期間が長かった</option></select>
 <button class="nxt" onclick="D.pd=document.getElementById('lp').value||'未入力';D.pc=document.getElementById('pc').value||'未選択';D.pa=document.getElementById('pa').value||'未選択';go(10)">次へ</button>
 </div></div>
@@ -174,17 +224,17 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <button class="bk" onclick="go(9)">戻る</button>
 <div class="sl">チェック 10/13</div><div class="q">性交の状況</div><div class="qn">妊娠の可能性判断のための確認です。</div>
 <label class="fl">① 3週間以上前に性交が</label>
-<div class="bg" style="margin-bottom:16px"><button class="b bn sx" data-k="s3w" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="s3w" data-v="yes" onclick="pk(this)">あった</button></div>
+<div class="bg2"><button class="b bn sx" data-k="s3w" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="s3w" data-v="yes" onclick="pk(this)">あった</button></div>
 <label class="fl">② 3週間以内に今回以外の性交が</label>
-<div class="bg" style="margin-bottom:16px"><button class="b bn sx" data-k="s3o" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="s3o" data-v="yes" onclick="pk(this)">あった</button></div>
+<div class="bg2"><button class="b bn sx" data-k="s3o" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="s3o" data-v="yes" onclick="pk(this)">あった</button></div>
 <label class="fl">③ 月経以降、今回より前に心配な性交が</label>
-<div class="bg" style="margin-bottom:16px"><button class="b bn sx" data-k="swr" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="swr" data-v="yes" onclick="pk(this)">あった</button></div>
-<div id="s3oWarn" style="display:none;background:var(--warn-bg);border:2px solid var(--warn);border-radius:12px;padding:14px;margin-top:16px;text-align:center;animation:fi .3s ease">
-<p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">ノルレボの服用は可能ですが、他の性交により妊娠が成立している可能性は否定できません。</p>
+<div class="bg2"><button class="b bn sx" data-k="swr" data-v="no" onclick="pk(this)">なかった</button><button class="b bw sx" data-k="swr" data-v="yes" onclick="pk(this)">あった</button></div>
+<div id="s3oWarn" class="alert" style="display:none">
+<p style="font-weight:700;color:var(--akane)">ノルレボの服用は可能ですが、他の性交により妊娠が成立している可能性は否定できません。</p>
 </div>
-<div id="pregWarn" style="display:none;background:var(--ng-bg);border:2px solid var(--ng);border-radius:12px;padding:16px;margin-top:16px;text-align:center;animation:fi .3s ease">
-<p style="font-size:16px;font-weight:700;color:var(--ng);line-height:1.7">🔬 妊娠検査が必要です</p>
-<p style="font-size:13px;color:var(--txs);margin-top:6px;line-height:1.6">現在妊娠している可能性を否定する必要があります。ご自身で事前に妊娠検査薬で検査していただくか、薬局にて検査していただく必要があります（妊娠検査薬1本 880円税込）。<br><strong style="color:var(--ng)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p>
+<div id="pregWarn" class="alert" style="display:none">
+<div class="alert-t"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>妊娠検査が必要です</div>
+<p style="margin-top:6px">現在妊娠している可能性を否定する必要があります。ご自身で事前に妊娠検査薬で検査していただくか、薬局にて検査していただく必要があります（妊娠検査薬1本 880円税込）。<br><strong style="color:var(--akane)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p>
 </div>
 <button class="nxt" id="sxN" disabled onclick="if(D.sx.s3w==='yes'||D.sx.swr==='yes')D.pr=true;go(11)">次へ</button>
 </div></div>
@@ -210,66 +260,81 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="sl">最終確認 13/13</div>
 <div class="q">内容確認と署名</div>
 <div class="qn">確認結果は自動でジロー薬局に送信されます。</div>
-<div style="background:var(--pri-l);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--txs);line-height:1.9" id="pvw"></div>
+<div class="pvw" id="pvw"></div>
 
-<div class="ci" style="border:none;padding:0 0 16px"><input type="checkbox" id="agr">
-<label for="agr" style="font-size:13px;line-height:1.6">上記の内容に相違ありません。情報提供と指導の内容を理解し、結果を薬局に送信することに同意します。</label></div>
+<div class="ci agree"><input type="checkbox" id="agr">
+<label for="agr">上記の内容に相違ありません。情報提供と指導の内容を理解し、結果を薬局に送信することに同意します。</label></div>
 
-<label class="fl">お名前（カタカナ）</label>
+<label class="fl" for="uName">お名前（カタカナ）</label>
 <input type="text" class="fi" id="uName" placeholder="ヤマダ ハナコ">
 
-<label class="fl">来局予定日時（任意）</label>
-<input type="datetime-local" class="fi" id="visitTime" style="margin-bottom:2px">
-<p style="font-size:11px;color:#aaa;margin-bottom:10px">未定の場合は空欄でOKです</p>
+<label class="fl" for="visitTime">来局予定日時（任意）</label>
+<input type="datetime-local" class="fi" id="visitTime">
+<p class="hint" style="margin-bottom:4px">未定の場合は空欄でOKです</p>
 
 <label class="fl">署名（指でサイン）</label>
-<div class="sig-wrap" id="sigW"><canvas id="sigC" height="150"></canvas><button class="sig-clear" onclick="clrSig()">クリア</button></div>
-<div class="sig-label">↑ 指またはペンで署名</div>
+<div class="sig-wrap" id="sigW"><canvas id="sigC" height="150"></canvas><button class="sig-clear" onclick="clrSig()">書き直す</button></div>
+<div class="sig-label">枠の中に、指またはペンで署名してください</div>
 
 <input type="text" id="hp_email" name="email" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;opacity:0;height:0">
 <!-- Cloudflare Turnstile widget (第3課 2026-05-02 本番キー) -->
 <div class="cf-turnstile" data-sitekey="0x4AAAAAADHkWVJdzrHtJBMm" data-theme="light" style="margin:12px 0;display:flex;justify-content:center"></div>
-<button class="nxt" id="subBtn" disabled onclick="submit()">✉️ 薬局に送信する</button>
+<button class="nxt" id="subBtn" disabled onclick="submit()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>薬局に送信する</button>
+<p class="hint" style="text-align:center">お名前・同意・署名がそろうと押せるようになります</p>
 </div></div>
 
 <!-- OK -->
 <div class="st" data-s="ok">
-<div class="rc rok"><div class="ri">✅</div><div class="rt">送信完了</div>
-<div class="rtx">受付番号：<strong id="rcpId"></strong><br>チェック結果をジロー薬局に送信しました。<br><strong>お電話の上、ご来局ください。</strong></div></div>
-<div class="cd" style="margin-top:16px">
-<h3 style="font-size:15px;margin-bottom:12px">📍 ジロー薬局</h3>
-<div class="ib" style="margin-top:0"><ul><li>お電話いただくとスムーズです</li><li>飲用水はご用意しています</li><li>プライバシー配慮の個別対応です</li></ul></div>
-<a href="tel:096-288-0783" class="tl">📞 096-288-0783 に電話する</a>
+<div class="done-head">
+<span class="check" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+<h1 class="big">送信完了</h1>
+<p class="sub">チェック結果をジロー薬局に送信しました。</p>
 </div>
-<div class="cd" id="s3oC" style="display:none;margin-top:16px;border:2px solid var(--warn)">
-<p style="font-size:14px;font-weight:700;color:var(--ng);line-height:1.7">ノルレボの服用は可能ですが、他の性交により妊娠が成立している可能性は否定できません。</p></div>
-<div class="cd" id="pregC" style="display:none;margin-top:16px;border:2px solid var(--ng)">
-<h3 style="font-size:15px;color:var(--ng);margin-bottom:8px">🔬 妊娠検査が必要です</h3>
-<p style="font-size:13px;color:var(--txs);line-height:1.7">現在妊娠している可能性を否定する必要があります。ご自身で事前に検査するか、薬局にて検査していただきます（検査薬1本 880円税込）。<br><strong style="color:var(--ng)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p></div>
-<div class="cd" id="nurC" style="display:none;margin-top:16px">
-<h3 style="font-size:14px;color:var(--warn);margin-bottom:8px">🍼 授乳中の方へ</h3>
-<p style="font-size:13px;color:var(--txs);line-height:1.7">服用後<strong>24時間は授乳を避けて</strong>ください。</p></div>
-<div class="cd" style="margin-top:16px">
-<h3 style="font-size:14px;margin-bottom:8px">💊 服用後の確認</h3>
-<p style="font-size:13px;color:var(--txs);line-height:1.7"><strong>3週間後</strong>に妊娠検査薬または産婦人科受診で確認してください。</p></div>
-<div class="cd" style="margin-top:16px">
-<h3 style="font-size:14px;margin-bottom:8px">🤝 相談窓口</h3>
-<p style="font-size:12px;color:var(--txs);line-height:1.6;margin-bottom:10px">性犯罪・性暴力の被害に遭われた方のための相談窓口です。匿名で相談できます。</p>
-<a href="tel:#8891" class="tl" style="background:#7B68AE">📞 #8891（性暴力被害者ワンストップ支援センター）</a>
-<p style="font-size:11px;color:#999;margin-top:6px;text-align:center">24時間・無料・匿名OK</p></div>
+<div class="cd">
+<span class="rcp-l">受付番号</span>
+<strong class="rcp" id="rcpId"></strong>
+<p class="strong-line">お電話の上、ご来局ください。</p>
+<a href="tel:096-288-0783" class="tel-p"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>096-288-0783 に電話する</a>
+<ul class="oks">
+<li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>お電話いただくとスムーズです</li>
+<li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>飲用水はご用意しています</li>
+<li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>プライバシー配慮の個別対応です</li>
+</ul>
+</div>
+<div class="alert" id="s3oC" style="display:none;margin:0 0 16px">
+<p style="font-weight:700;color:var(--akane)">ノルレボの服用は可能ですが、他の性交により妊娠が成立している可能性は否定できません。</p></div>
+<div class="alert" id="pregC" style="display:none;margin:0 0 16px">
+<div class="alert-t"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>妊娠検査が必要です</div>
+<p style="margin-top:6px">現在妊娠している可能性を否定する必要があります。ご自身で事前に検査するか、薬局にて検査していただきます（検査薬1本 880円税込）。<br><strong style="color:var(--akane)">※妊娠中はノルレボを服用できません（添付文書上、禁忌）。</strong></p></div>
+<div class="panel-blue" id="nurC" style="display:none">
+<div class="panel-h"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>授乳中の方へ</div>
+<p>服用後<strong>24時間は授乳を避けて</strong>ください。</p></div>
+<div class="panel-blue">
+<div class="panel-h"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>服用後の確認</div>
+<p><strong>3週間後</strong>に妊娠検査薬または産婦人科受診で確認してください。</p></div>
+<div class="cd">
+<h2 class="h2" style="margin-bottom:6px">相談窓口</h2>
+<p class="small">性犯罪・性暴力の被害に遭われた方のための相談窓口です。匿名で相談できます。</p>
+<a href="tel:%238891" class="tel-s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><span>#8891（性暴力被害者ワンストップ支援センター）</span></a>
+<p class="small" style="margin-top:6px">24時間・無料・匿名OK</p></div>
 <button class="rb" onclick="restart()">最初からやり直す</button>
 </div>
 
 <!-- NG -->
 <div class="st" data-s="ng">
-<div class="rc rng"><div class="ri" id="nI">❌</div><div class="rt" id="nT"></div><div class="rtx" id="nX"></div></div>
-<div class="cd" style="margin-top:16px"><div id="nA"></div>
-<a href="https://medicopt.lnln.jp/clinic" target="_blank" class="lb">🏥 産婦人科を探す</a>
-<a href="tel:096-288-0783" class="tl" style="margin-top:10px">📞 ジロー薬局に相談</a></div>
-<div class="cd" style="margin-top:16px">
-<p style="font-size:12px;color:var(--txs);line-height:1.6;margin-bottom:10px">性犯罪・性暴力の被害に遭われた方のための相談窓口です。匿名で相談できます。</p>
-<a href="tel:#8891" class="tl" style="background:#7B68AE">📞 #8891（性暴力被害者ワンストップ支援センター）</a>
-<p style="font-size:11px;color:#999;margin-top:6px;text-align:center">24時間・無料・匿名OK</p></div>
+<div class="alert" style="margin:4px 0 16px;padding:18px 16px">
+<div class="ri" id="nI">❌</div>
+<div class="ng-t"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#b7282e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg><div class="rt" id="nT"></div></div>
+<div class="rtx" id="nX"></div>
+</div>
+<div class="cd"><div id="nA"></div>
+<a href="tel:096-288-0783" class="tel-p" style="margin-top:6px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>ジロー薬局に相談</a>
+<a href="https://medicopt.lnln.jp/clinic" target="_blank" rel="noopener" class="tel-s center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>産婦人科を探す</a></div>
+<div class="cd">
+<h2 class="h2" style="margin-bottom:6px">相談窓口</h2>
+<p class="small">性犯罪・性暴力の被害に遭われた方のための相談窓口です。匿名で相談できます。</p>
+<a href="tel:%238891" class="tel-s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#165e83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><span>#8891（性暴力被害者ワンストップ支援センター）</span></a>
+<p class="small" style="margin-top:6px">24時間・無料・匿名OK</p></div>
 <button class="rb" onclick="restart()">最初からやり直す</button>
 </div>
 
@@ -287,11 +352,11 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 </div>
 
 <!-- 送信オーバーレイ -->
-<div class="ovl" id="ovl"><div class="ovl-box">
+<div class="ovl" id="ovl"><div class="ovl-box" role="status" aria-live="polite">
 <div class="spinner" id="ovlSpin"></div>
 <div class="ri" id="ovlIcon" style="display:none"></div>
-<p style="font-size:15px;font-weight:700;margin-bottom:8px" id="ovlMsg">送信中...</p>
-<p style="font-size:13px;color:var(--txs)" id="ovlSub"></p>
+<p style="font-size:17px;font-weight:700;margin-bottom:8px" id="ovlMsg">送信中...</p>
+<p style="font-size:14px;line-height:23px;color:var(--muted)" id="ovlSub"></p>
 </div></div>
 
 <script>
