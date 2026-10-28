@@ -20,6 +20,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'BIZ UDPGothic','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;background:var(--surface);color:var(--ink);font-size:16px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+html,body{overscroll-behavior-y:contain}
 button,input,select{font-family:inherit}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px #2792c3}
 .app-header{height:56px;padding:0 16px;display:flex;align-items:center;gap:10px;background:#fff;border-bottom:1px solid var(--line)}
@@ -72,8 +73,8 @@ select.fi{font-weight:700;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .alert-t{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--akane);line-height:1.6}
 .alert p{font-size:15px;line-height:25px}
 .pvw{background:var(--surface);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:15px;line-height:1.9;color:var(--ink)}
-.sig-wrap{position:relative;border:2px solid var(--muted);border-radius:12px;background:#fff;touch-action:none;margin-bottom:6px}
-.sig-wrap canvas{display:block;width:100%;border-radius:10px}
+.sig-wrap{position:relative;border:2px solid var(--muted);border-radius:12px;background:#fff;touch-action:none;margin-bottom:6px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.sig-wrap canvas{display:block;width:100%;border-radius:10px;touch-action:none;cursor:crosshair}
 .sig-clear{position:absolute;top:8px;right:8px;min-height:36px;padding:0 12px;border:1px solid var(--muted);border-radius:9999px;background:#fff;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}
 .sig-label{font-size:13px;line-height:20px;color:var(--muted);margin-bottom:12px}
 .done-head{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:12px 0 16px}
@@ -403,29 +404,47 @@ function buildPvw(){
   initSig();
 }
 
-// Signature（2026-10-28 滑らかに: 画面の解像度に合わせた高精細キャンバス、点と点の中間を通る曲線、
-// 端末がまとめて届ける座標も使う、書く速さで線の太さを少し変える。送信する画像は従来どおり PNG）
-let sigC,sigX,drawing=false,sigBound=false,sigPts=[],sigPid=null,sigLW=2.6;
-const SIG_H=150,SIG_INK='#2D3436';
-function sigPos(e){const r=sigC.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,t:e.timeStamp||performance.now()}}
+// Signature（2026-10-28 滑らかに → 2026-10-29 さらに滑らかに＋署名中に画面が動かないように）
+//  ・画面の解像度に合わせた高精細キャンバス
+//  ・指の震えを消す: 新しい座標へ少しずつ寄せる（半減期 20ms。指を離した位置までは最後に必ず伸ばす）
+//  ・点と点の中間を通る曲線でつなぐ。端末がまとめて届ける座標も使う
+//  ・書く速さ（ペンなら筆圧）で線の太さを 2.2〜3.6px の間でゆっくり変える
+//  ・touch-action:none に加えて touchstart/touchmove を止め、書いている間は画面のスクロールも止める
+//  送信する画像は従来どおり PNG（toDataURL）
+let sigC,sigX,drawing=false,sigBound=false,sigPts=[],sigSm=null,sigPid=null,sigLW=3;
+const SIG_H=150,SIG_INK='#2D3436',SIG_MIN=2.2,SIG_MAX=3.6,SIG_HALF=20;
+function sigPos(e){const r=sigC.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,t:e.timeStamp||performance.now(),p:(e.pointerType==='pen'&&e.pressure>0)?e.pressure:0}}
 function sigMid(a,b){return{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}
-function sigAdd(p){
-  const n=sigPts.length;
-  if(n){const q=sigPts[n-1],d=Math.hypot(p.x-q.x,p.y-q.y);if(d<0.6)return;
-    const v=d/Math.max(1,p.t-q.t);const target=Math.max(1.8,Math.min(3.4,3.4-v*1.2));
-    sigLW=sigLW*0.7+target*0.3;sigX.lineWidth=sigLW}
-  sigPts.push(p);
-  sigX.beginPath();
-  if(n>=2){const a=sigPts[n-2],b=sigPts[n-1],m0=sigMid(a,b),m1=sigMid(b,p);sigX.moveTo(m0.x,m0.y);sigX.quadraticCurveTo(b.x,b.y,m1.x,m1.y)}
-  else if(n===1){const a=sigPts[0],m1=sigMid(a,p);sigX.moveTo(a.x,a.y);sigX.lineTo(m1.x,m1.y)}
-  else return;
-  sigX.stroke();if(!hasSig){hasSig=true;chkSub()}
+function sigSmooth(r,final){   // 震え取り。final のときは寄せずにその位置へ
+  if(!sigSm||final){sigSm={x:r.x,y:r.y,t:r.t};return{x:r.x,y:r.y,t:r.t,p:r.p}}
+  const dt=Math.max(4,Math.min(64,r.t-sigSm.t)),a=1-Math.pow(0.5,dt/SIG_HALF);
+  sigSm={x:sigSm.x+(r.x-sigSm.x)*a,y:sigSm.y+(r.y-sigSm.y)*a,t:r.t};
+  return{x:sigSm.x,y:sigSm.y,t:r.t,p:r.p}
+}
+function sigWidth(q,p){   // q→p の速さ（ペンなら筆圧）から太さを決め、急に変わらないように寄せる
+  let target;
+  if(p.p>0)target=SIG_MIN+(SIG_MAX-SIG_MIN)*Math.min(1,p.p*1.5);
+  else{const v=Math.hypot(p.x-q.x,p.y-q.y)/Math.max(1,p.t-q.t);target=SIG_MAX-(SIG_MAX-SIG_MIN)*Math.min(1,v/1.2)}
+  sigLW+=(target-sigLW)*0.2;return sigLW
+}
+function sigSeg(a,b,c){   // a→b の中点から b→c の中点まで、b に寄る曲線を b の太さで描く
+  const m0=sigMid(a,b),m1=sigMid(b,c);sigX.lineWidth=b.w;sigX.beginPath();sigX.moveTo(m0.x,m0.y);sigX.quadraticCurveTo(b.x,b.y,m1.x,m1.y);sigX.stroke()
+}
+function sigAdd(r,final){
+  const p=sigSmooth(r,final),n=sigPts.length;
+  if(!n){p.w=sigLW;sigPts.push(p);return}
+  const q=sigPts[n-1];if(Math.hypot(p.x-q.x,p.y-q.y)<(final?0.2:1))return;
+  p.w=sigWidth(q,p);sigPts.push(p);
+  if(n>=2)sigSeg(sigPts[n-2],q,p);
+  else{const m=sigMid(q,p);sigX.lineWidth=q.w;sigX.beginPath();sigX.moveTo(q.x,q.y);sigX.lineTo(m.x,m.y);sigX.stroke()}
+  if(!hasSig){hasSig=true;chkSub()}
 }
 function sigEnd(e){
   if(!drawing||(e&&e.pointerId!==sigPid))return;drawing=false;
+  if(e&&e.type==='pointerup')sigAdd(sigPos(e),true);   // 指を離した位置まで線を伸ばす（寄せた分の遅れをなくす）
   const n=sigPts.length;
-  if(n>=2){const m=sigMid(sigPts[n-2],sigPts[n-1]),b=sigPts[n-1];sigX.beginPath();sigX.moveTo(m.x,m.y);sigX.lineTo(b.x,b.y);sigX.stroke()}
-  sigPts=[];try{sigC.releasePointerCapture(e.pointerId)}catch(_){}
+  if(n>=2){const a=sigPts[n-2],b=sigPts[n-1],m=sigMid(a,b);sigX.lineWidth=b.w;sigX.beginPath();sigX.moveTo(m.x,m.y);sigX.lineTo(b.x,b.y);sigX.stroke()}
+  sigPts=[];sigSm=null;try{sigC.releasePointerCapture(e.pointerId)}catch(_){}
 }
 function initSig(){
   sigC=document.getElementById('sigC');const w=document.getElementById('sigW');
@@ -434,18 +453,25 @@ function initSig(){
   sigC.width=Math.round(cssW*dpr);sigC.height=Math.round(SIG_H*dpr);
   sigX=sigC.getContext('2d');sigX.setTransform(dpr,0,0,dpr,0,0);
   sigX.strokeStyle=SIG_INK;sigX.fillStyle=SIG_INK;sigX.lineCap='round';sigX.lineJoin='round';sigX.lineWidth=sigLW;
-  hasSig=false;drawing=false;sigPts=[];chkSub();   // 画面を作り直したら署名もやり直し（空のまま送れないように）
+  hasSig=false;drawing=false;sigPts=[];sigSm=null;chkSub();   // 画面を作り直したら署名もやり直し（空のまま送れないように）
   if(sigBound)return;sigBound=true;
-  sigC.addEventListener('pointerdown',e=>{if(drawing)return;drawing=true;sigPid=e.pointerId;sigPts=[];sigLW=2.6;sigX.lineWidth=sigLW;
+  const stopTouch=e=>{if(e.cancelable)e.preventDefault()};   // 署名の枠では画面のスクロール・長押し・拡大を起こさない
+  sigC.addEventListener('touchstart',stopTouch,{passive:false});
+  sigC.addEventListener('touchmove',stopTouch,{passive:false});
+  document.addEventListener('touchmove',e=>{if(drawing&&e.cancelable)e.preventDefault()},{passive:false});   // 書いている間は枠の外に指が出ても画面を動かさない
+  sigC.addEventListener('contextmenu',e=>e.preventDefault());
+  sigC.addEventListener('pointerdown',e=>{if(drawing||(e.pointerType==='mouse'&&e.button!==0))return;
+    const ae=document.activeElement;if(ae&&ae!==document.body&&ae.blur)try{ae.blur()}catch(_){}   // 名前欄のキーボードを閉じてから書く
+    drawing=true;sigPid=e.pointerId;sigPts=[];sigSm=null;sigLW=3;
     try{sigC.setPointerCapture(e.pointerId)}catch(_){}
-    const p=sigPos(e);sigPts.push(p);sigX.beginPath();sigX.arc(p.x,p.y,sigLW/2,0,Math.PI*2);sigX.fill();e.preventDefault()});
+    sigAdd(sigPos(e),true);const p=sigPts[0];sigX.beginPath();sigX.arc(p.x,p.y,sigLW/2,0,Math.PI*2);sigX.fill();e.preventDefault()});
   sigC.addEventListener('pointermove',e=>{if(!drawing||e.pointerId!==sigPid)return;
     const co=(typeof e.getCoalescedEvents==='function')?e.getCoalescedEvents():null;
     const list=(co&&co.length)?co:[e];for(const ev of list)sigAdd(sigPos(ev));e.preventDefault()});
   sigC.addEventListener('pointerup',sigEnd);sigC.addEventListener('pointercancel',sigEnd);
   document.getElementById('agr').addEventListener('change',chkSub);document.getElementById('uName').addEventListener('input',chkSub);
 }
-function clrSig(){sigX.save();sigX.setTransform(1,0,0,1,0,0);sigX.clearRect(0,0,sigC.width,sigC.height);sigX.restore();hasSig=false;sigPts=[];drawing=false;chkSub()}
+function clrSig(){sigX.save();sigX.setTransform(1,0,0,1,0,0);sigX.clearRect(0,0,sigC.width,sigC.height);sigX.restore();hasSig=false;sigPts=[];sigSm=null;drawing=false;chkSub()}
 function chkSub(){document.getElementById('subBtn').disabled=!(document.getElementById('agr').checked&&document.getElementById('uName').value.trim()&&hasSig)}
 
 // Submit
