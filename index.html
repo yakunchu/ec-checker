@@ -403,14 +403,49 @@ function buildPvw(){
   initSig();
 }
 
-// Signature
-let sigC,sigX,drawing=false;
-function initSig(){sigC=document.getElementById('sigC');const w=document.getElementById('sigW');sigC.width=w.offsetWidth-4;sigX=sigC.getContext('2d');sigX.strokeStyle='#2D3436';sigX.lineWidth=2.5;sigX.lineCap='round';sigX.lineJoin='round';
-sigC.addEventListener('pointerdown',e=>{drawing=true;sigX.beginPath();const r=sigC.getBoundingClientRect();sigX.moveTo(e.clientX-r.left,e.clientY-r.top);e.preventDefault()});
-sigC.addEventListener('pointermove',e=>{if(!drawing)return;const r=sigC.getBoundingClientRect();sigX.lineTo(e.clientX-r.left,e.clientY-r.top);sigX.stroke();hasSig=true;chkSub();e.preventDefault()});
-sigC.addEventListener('pointerup',()=>drawing=false);sigC.addEventListener('pointerleave',()=>drawing=false);
-document.getElementById('agr').addEventListener('change',chkSub);document.getElementById('uName').addEventListener('input',chkSub)}
-function clrSig(){sigX.clearRect(0,0,sigC.width,sigC.height);hasSig=false;chkSub()}
+// Signature（2026-10-28 滑らかに: 画面の解像度に合わせた高精細キャンバス、点と点の中間を通る曲線、
+// 端末がまとめて届ける座標も使う、書く速さで線の太さを少し変える。送信する画像は従来どおり PNG）
+let sigC,sigX,drawing=false,sigBound=false,sigPts=[],sigPid=null,sigLW=2.6;
+const SIG_H=150,SIG_INK='#2D3436';
+function sigPos(e){const r=sigC.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,t:e.timeStamp||performance.now()}}
+function sigMid(a,b){return{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}
+function sigAdd(p){
+  const n=sigPts.length;
+  if(n){const q=sigPts[n-1],d=Math.hypot(p.x-q.x,p.y-q.y);if(d<0.6)return;
+    const v=d/Math.max(1,p.t-q.t);const target=Math.max(1.8,Math.min(3.4,3.4-v*1.2));
+    sigLW=sigLW*0.7+target*0.3;sigX.lineWidth=sigLW}
+  sigPts.push(p);
+  sigX.beginPath();
+  if(n>=2){const a=sigPts[n-2],b=sigPts[n-1],m0=sigMid(a,b),m1=sigMid(b,p);sigX.moveTo(m0.x,m0.y);sigX.quadraticCurveTo(b.x,b.y,m1.x,m1.y)}
+  else if(n===1){const a=sigPts[0],m1=sigMid(a,p);sigX.moveTo(a.x,a.y);sigX.lineTo(m1.x,m1.y)}
+  else return;
+  sigX.stroke();if(!hasSig){hasSig=true;chkSub()}
+}
+function sigEnd(e){
+  if(!drawing||(e&&e.pointerId!==sigPid))return;drawing=false;
+  const n=sigPts.length;
+  if(n>=2){const m=sigMid(sigPts[n-2],sigPts[n-1]),b=sigPts[n-1];sigX.beginPath();sigX.moveTo(m.x,m.y);sigX.lineTo(b.x,b.y);sigX.stroke()}
+  sigPts=[];try{sigC.releasePointerCapture(e.pointerId)}catch(_){}
+}
+function initSig(){
+  sigC=document.getElementById('sigC');const w=document.getElementById('sigW');
+  const dpr=Math.min(window.devicePixelRatio||1,3),cssW=w.clientWidth;
+  sigC.style.width=cssW+'px';sigC.style.height=SIG_H+'px';
+  sigC.width=Math.round(cssW*dpr);sigC.height=Math.round(SIG_H*dpr);
+  sigX=sigC.getContext('2d');sigX.setTransform(dpr,0,0,dpr,0,0);
+  sigX.strokeStyle=SIG_INK;sigX.fillStyle=SIG_INK;sigX.lineCap='round';sigX.lineJoin='round';sigX.lineWidth=sigLW;
+  hasSig=false;drawing=false;sigPts=[];chkSub();   // 画面を作り直したら署名もやり直し（空のまま送れないように）
+  if(sigBound)return;sigBound=true;
+  sigC.addEventListener('pointerdown',e=>{if(drawing)return;drawing=true;sigPid=e.pointerId;sigPts=[];sigLW=2.6;sigX.lineWidth=sigLW;
+    try{sigC.setPointerCapture(e.pointerId)}catch(_){}
+    const p=sigPos(e);sigPts.push(p);sigX.beginPath();sigX.arc(p.x,p.y,sigLW/2,0,Math.PI*2);sigX.fill();e.preventDefault()});
+  sigC.addEventListener('pointermove',e=>{if(!drawing||e.pointerId!==sigPid)return;
+    const co=(typeof e.getCoalescedEvents==='function')?e.getCoalescedEvents():null;
+    const list=(co&&co.length)?co:[e];for(const ev of list)sigAdd(sigPos(ev));e.preventDefault()});
+  sigC.addEventListener('pointerup',sigEnd);sigC.addEventListener('pointercancel',sigEnd);
+  document.getElementById('agr').addEventListener('change',chkSub);document.getElementById('uName').addEventListener('input',chkSub);
+}
+function clrSig(){sigX.save();sigX.setTransform(1,0,0,1,0,0);sigX.clearRect(0,0,sigC.width,sigC.height);sigX.restore();hasSig=false;sigPts=[];drawing=false;chkSub()}
 function chkSub(){document.getElementById('subBtn').disabled=!(document.getElementById('agr').checked&&document.getElementById('uName').value.trim()&&hasSig)}
 
 // Submit
